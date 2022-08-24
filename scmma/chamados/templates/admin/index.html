@@ -1,0 +1,27 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<h1 class="m-3">Área do Administrador</h1>
+<div class="row">
+    <div class="col-sm-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Clientes</h5>
+          <p class="card-text">Usuários responsáveis pelos terminais de autoatendimento.</p>
+          <a href="{% url 'adicionar_cliente' %}" class="btn btn-primary btn-sm m-2"><i class="fa-solid fa-plus"></i> Adicionar</a>
+          <a href="{% url 'admin_index_cliente' %}" class="btn btn-primary btn-sm m-2"><i class="fa-solid fa-list"></i> Acessar</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Terminais</h5>
+          <p class="card-text">Terminais de autoatendimento abrangidos pelo sistema de manutenção.</p>
+          <a href="{% url 'adicionar_terminal' %}" class="btn btn-primary btn-sm m-2"><i class="fa-solid fa-plus"></i> Adicionar</a>
+          <a href="{% url 'admin_index_terminal' %}" class="btn btn-primary btn-sm m-2"><i class="fa-solid fa-list"></i> Acessar</a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

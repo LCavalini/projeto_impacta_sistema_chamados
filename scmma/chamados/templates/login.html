@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {{ form.errors }}
+    <form method="post">
+    {% csrf_token %}
+    <div class="row m-2">
+        <div class="col-lg-1">{{ form.email.label_tag }}</div>
+        <div class="col-lg-8">{{ form.email }}</div>
+    </div>
+    <div class="row m-2">
+        <div class="col-lg-1">{{ form.password.label_tag }}</div>
+        <div class="col-lg-8">{{ form.password }}</div>
+    </div>
+    <input type="submit" class="btn btn-primary" value="Entrar">
+    <input type="hidden" name="next" value="{{ next }}">
+    </form>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+    Tem certeza que deseja remover o item abaixo?
+    {{ cliente.email }}
+    <form method="post">
+        {% csrf_token %}
+        <input type="submit" value="Remover">
+    </form>
+{% endblock %}
