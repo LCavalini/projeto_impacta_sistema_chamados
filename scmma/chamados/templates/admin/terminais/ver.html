@@ -2,7 +2,7 @@
 
 {% block content %}
     <table class="table table-hover">
-        {% for campo, valor in terminal.campos %}
+        {% for campo, valor in terminal.get_fields %}
         <tr>
             <td>{{ campo }}</td>
             <td>{{ valor }}</td>

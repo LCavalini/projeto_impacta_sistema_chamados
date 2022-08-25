@@ -10,22 +10,32 @@
             <tr>
                 <th>Nome</th>
                 <th>Email</th>
+                <th>Removido</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
             {% for cliente in lista_clientes %}
-            <tr>
-                <td>{{ cliente.get_full_name|default_if_none:'' }}</td>
-                <td>{{ cliente.email|default_if_none:'' }}</td>
-                <td>
-                    <a class="btn btn-primary btn-sm" href="{% url 'ver_cliente' cliente.pk %}"><i class="fa-solid fa-eye"></i></a>
-                    <a class="btn btn-primary btn-sm" href="{% url 'editar_cliente' cliente.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>
-                    <a class="btn btn-primary btn-sm btn-remover" href="{% url 'remover_cliente' cliente.pk %}">
-                        <i class="fa-solid fa-trash"></i>
-                    </a>
-                </td>
-            </tr>
+                {% if cliente.tipo_usuario == 'Cliente' %}
+                <tr>
+                    <td>{{ cliente.get_full_name|default_if_none:'' }}</td>
+                    <td>{{ cliente.email|default_if_none:'' }}</td>
+                    <td>{% if cliente.is_active %}Não{% else %}Sim{% endif %}</td>
+                    <td>
+                        <a class="btn btn-primary btn-sm" href="{% url 'ver_cliente' cliente.pk %}"><i class="fa-solid fa-eye"></i></a>
+                        <a class="btn btn-primary btn-sm" href="{% url 'editar_cliente' cliente.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>
+                        {% if cliente.is_active %}
+                            <a class="btn btn-primary btn-sm btn-remover" href="{% url 'remover_cliente' cliente.pk %}">
+                                <i class="fa-solid fa-trash"></i>
+                            </a>
+                        {% else %}
+                            <a class="btn btn-primary btn-sm btn-remover" href="{% url 'reativar_cliente' cliente.pk %}">
+                                <i class="fa-solid fa-rotate-left"></i>
+                            </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endif %}
             {% endfor %}
         </tbody>
     </table>

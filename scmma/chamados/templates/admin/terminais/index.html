@@ -9,6 +9,7 @@
                 <th>Número de série</th>
                 <th>Data de instalação</th>
                 <th>Cliente</th>
+                <th>Removido</th>
                 <th></th>
             </tr>
         </thead>
@@ -17,13 +18,24 @@
             <tr>
                 <td>{{ terminal.numero_serie|default_if_none:'' }}</td>
                 <td>{{ terminal.data_instalacao|default_if_none:'' }}</td>
-                <td><a href="{% url 'ver_cliente' terminal.cliente_id %}">{{ terminal.cliente|default_if_none:'' }}</a></td>
+                <td>
+                    {% if terminal.usuario %}
+                        <a href="{% url 'ver_cliente' terminal.usuario.pk %}">{{ terminal.usuario|default_if_none:'' }}</a>
+                    {% endif %}
+                </td>
+                <td>{% if terminal.is_active %}Não{% else %}Sim{% endif %}</td>
                 <td>
                     <a class="btn btn-primary btn-sm" href="{% url 'ver_terminal' terminal.pk %}"><i class="fa-solid fa-eye"></i></a>
                     <a class="btn btn-primary btn-sm" href="{% url 'editar_terminal' terminal.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>
-                    <a class="btn btn-primary btn-sm btn-remover" href="{% url 'remover_terminal' terminal.pk %}">
-                        <i class="fa-solid fa-trash"></i>
-                    </a>
+                    {% if terminal.is_active %}
+                        <a class="btn btn-primary btn-sm btn-remover" href="{% url 'remover_terminal' terminal.pk %}">
+                            <i class="fa-solid fa-trash"></i>
+                        </a>
+                    {% else %}
+                        <a class="btn btn-primary btn-sm btn-remover" href="{% url 'reativar_terminal' terminal.pk %}">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </a>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}

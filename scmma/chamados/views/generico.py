@@ -1,23 +1,34 @@
-from django.contrib.auth.views import LoginView, LogoutView
-from django.contrib.auth import login as auth_login
+from django.contrib.auth.views import LoginView, LogoutView, PasswordResetView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views import View
 from django.shortcuts import HttpResponseRedirect
+from django.urls import reverse_lazy
 
-from ..forms import AutenticarUsuarioForm
+from ..forms import AutenticarUsuarioForm, RedefinirSenhaForm
 
 
 class AutenticarUsuario(LoginView):
     template_name = 'login.html'
     form_class = AutenticarUsuarioForm
     redirect_authenticated_user = True
-
-    def form_valid(self, form):
-        auth_login(self.request, form.get_user())
-        if self.request.user.is_superuser:
-            self.next_page = 'index_admin'
-        elif self.request.user.user_type == 0:
-            self.next_page = 'index_cliente'
-        return HttpResponseRedirect(self.get_success_url())
+    next_page = 'index'
 
 
 class DesautenticarUsuario(LogoutView):
     next_page = 'autenticar_usuario'
+
+
+class RedefinirSenha(PasswordResetView):
+    template_name = 'redefinir_senha.html'
+    email_template_name = 'email_redefinir_senha.html'
+    form_class = RedefinirSenhaForm
+
+
+class Index(LoginRequiredMixin, View):
+    login_url = 'autenticar_usuario'
+
+    def get(self, request):
+        if request.user.tipo_usuario == 'Cliente':
+            return HttpResponseRedirect(reverse_lazy('index_cliente'))
+        elif request.user.tipo_usuario == 'Administrador':
+            return HttpResponseRedirect(reverse_lazy('index_admin'))

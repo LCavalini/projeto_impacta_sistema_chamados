@@ -1,18 +1,25 @@
 from django import forms
 from django.forms import ModelForm
-from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth.forms import PasswordResetForm
 from .models import Chamado, Terminal, Usuario
 
 UserModel = get_user_model()
 
 
-class AdicionarClienteForm(UserCreationForm):
+class AdicionarClienteForm(ModelForm):
 
-    class Meta(UserCreationForm.Meta):
+    class Meta:
         model = Usuario
-        fields = ['first_name', 'last_name', 'email', 'cpf', 'cnpj', 'birth_date', 'telefone', ]
+        fields = Usuario.CAMPOS_CLIENTE
+
+
+class ReativarClienteForm(ModelForm):
+
+    class Meta:
+        model = Usuario
+        fields = []
 
 
 class AdicionarTerminalForm(ModelForm):
@@ -20,14 +27,25 @@ class AdicionarTerminalForm(ModelForm):
     class Meta:
         model = Terminal
         fields = ['data_instalacao', 'numero_serie', 'rua', 'numero', 'complemento', 'bairro', 'cidade', 'estado',
-                  'cep', 'cliente']
+                  'cep', 'usuario']
+
+
+class ReativarTerminalForm(ModelForm):
+
+    class Meta:
+        model = Terminal
+        fields = []
 
 
 class AdicionarChamadoForm(ModelForm):
 
     class Meta:
         model = Chamado
-        fields = ['tipo', 'descricao', 'gravidade', 'cliente', 'terminal']
+        fields = ['tipo', 'descricao', 'gravidade', 'usuario', 'terminal']
+
+
+class RedefinirSenhaForm(PasswordResetForm):
+    pass
 
 
 class AutenticarUsuarioForm(forms.Form):

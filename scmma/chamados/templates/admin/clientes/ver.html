@@ -2,7 +2,7 @@
 
 {% block content %}
     <table class="table table-hover">
-        {% for campo, valor in cliente.campos %}
+        {% for campo, valor in cliente.get_fields_cliente %}
         <tr>
             <td>{{ campo }}</td>
             <td>{{ valor }}</td>

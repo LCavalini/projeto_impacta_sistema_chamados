@@ -12,7 +12,8 @@
         <div class="col-lg-1">{{ form.password.label_tag }}</div>
         <div class="col-lg-8">{{ form.password }}</div>
     </div>
-    <input type="submit" class="btn btn-primary" value="Entrar">
+    <input type="submit" class="btn btn-primary btn-sm" value="Entrar">
+    <a class="btn btn-primary btn-sm" href="{% url 'redefinir_senha' %}">Redefinir senha</a>
     <input type="hidden" name="next" value="{{ next }}">
     </form>
 {% endblock %}

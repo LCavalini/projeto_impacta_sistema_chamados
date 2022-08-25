@@ -11,3 +11,6 @@ migrations/
 
 # Vscode
 .vscode/
+
+# Outros
+credenciais.json
