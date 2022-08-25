@@ -56,19 +56,7 @@ class AutenticarUsuarioForm(forms.Form):
         widget=forms.PasswordInput(attrs={"autocomplete": "current-password"}),
     )
 
-    error_messages = {
-        "invalid_login": (
-            "Please enter a correct %(email)s and password. Note that both "
-            "fields may be case-sensitive."
-        ),
-        "inactive": ("This account is inactive."),
-    }
-
     def __init__(self, request=None, *args, **kwargs):
-        """
-        The 'request' parameter is set for custom auth use by subclasses.
-        The form data comes in via the standard 'data' kwarg.
-        """
         self.request = request
         self.user_cache = None
         super().__init__(*args, **kwargs)
@@ -91,7 +79,7 @@ class AutenticarUsuarioForm(forms.Form):
     def confirm_login_allowed(self, user):
         if not user.is_active:
             raise ValidationError(
-                self.error_messages["inactive"],
+                'Usuário inativo. Entre em contato com o Administrador.',
                 code="inactive",
             )
 
@@ -100,7 +88,6 @@ class AutenticarUsuarioForm(forms.Form):
 
     def get_invalid_login_error(self):
         return ValidationError(
-            self.error_messages["invalid_login"],
-            code="invalid_login",
-            params={"email": self.email.verbose_name},
+            'Email ou senha incorretos',
+            code="invalid_login"
         )

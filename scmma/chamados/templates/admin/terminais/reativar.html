@@ -1,11 +1,27 @@
 {% extends 'admin/base.html' %}
 
 {% block content %}
-    Tem certeza que deseja reativar o item abaixo?
-    {{ terminal.numero_serie }}
-    <form method="post">
-        {% csrf_token %}
-        {{ form }}
-        <input type="submit" value="Reativar">
-    </form>
+<div class="card col-lg-8 offset-lg-2 col-md-12 mt-5">
+    <div class="card-title">
+        <h3>Reativar Terminal</h3>
+    </div>
+    <div class="card-body">
+        <p>Tem certeza que deseja reativar o terminal abaixo?</p>
+        <table class="table table-hover">
+            {% for campo, valor in terminal.get_fields %}
+            <tr>
+                <td>{{ campo }}</td>
+                <td>{{ valor }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <form method="post" class="form-cadastro">
+            {% csrf_token %}
+            {{ form }}
+            <div class="row justify-content-center mt-4">
+                <input type="submit" class="btn btn-primary" value="Reativar">
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

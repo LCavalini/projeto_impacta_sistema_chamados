@@ -1,20 +1,28 @@
 {% extends "cliente/base.html" %}
 
 {% block content %}
-    <h1 class="m-3">Abrir Chamado</h1>
-    <form method="post">
-        {% csrf_token %}
-        {% for field in form %}
-            <div class="px-2 py-2 col-md-12">
-                <div class="row">
-                    {{ field.errors }}
+<div class="card col-lg-8 offset-lg-2 col-md-12 mt-5">
+    <div class="card-title">
+        <h3 class="titulo-pagina m-3">Abrir Chamado</h3>
+    </div>
+    <div class="card-body">
+        <form method="post" class="form-cadastro">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="px-2 py-2 col-md-12">
+                    <div class="row">
+                        {{ field.errors }}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">{{ field.label_tag }}</div>
+                        <div class="col-md-9">{{ field }}</div>
+                    </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-3">{{ field.label_tag }}</div>
-                    <div class="col-md-9">{{ field }}</div>
-                </div>
+            {% endfor %}
+            <div class="row justify-content-center mt-4">
+                <input class="btn btn-primary my-3" type="submit" value="Enviar">
             </div>
-        {% endfor %}
-        <input class="btn btn-primary my-3" type="submit" value="Enviar">
-    </form>
+        </form>
+    </div>
+</div>
 {% endblock %}

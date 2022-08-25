@@ -16,7 +16,7 @@ import json
 
 
 def retornar_credenciais(nome_campo):
-    caminho_arquivo = os.path.join(Path(__file__), 'credenciais.json')
+    caminho_arquivo = os.path.join(os.path.dirname(Path(__file__)), 'credenciais.json')
     try:
         with open(caminho_arquivo, 'r') as arquivo:
             credenciais = json.load(arquivo)
@@ -139,10 +139,19 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'chamados.Usuario'
 
+# Configuração de e-mail
 EMAIL_HOST = 'smtp.gmail.com'
+
 EMAIL_HOST_USER = retornar_credenciais('EMAIL_HOST_USER')
+
 EMAIL_HOST_PASSWORD = retornar_credenciais('EMAIL_HOST_PASSWORD')
+
 EMAIL_PORT = 587
+
 EMAIL_USE_TLS = True
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'emails_enviados')

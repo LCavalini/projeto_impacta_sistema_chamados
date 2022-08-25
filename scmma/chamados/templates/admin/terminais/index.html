@@ -1,44 +1,52 @@
 {% extends 'admin/base.html' %}
 
+{% block title %}SCMMA - Área do Administrador - Terminais{% endblock %}
+
 {% block content %}
-    <h1 class="m-2">Cadastro de Terminais</h1>
-    <a class="btn btn-primary btn-sm mx-2 my-4" href="{% url 'adicionar_terminal' %}"><i class="fa-solid fa-plus"></i> Adicionar Terminal</a>
-    <table class="table table-borderless my-2">
-        <thead>
-            <tr>
-                <th>Número de série</th>
-                <th>Data de instalação</th>
-                <th>Cliente</th>
-                <th>Removido</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for terminal in lista_terminais %}
-            <tr>
-                <td>{{ terminal.numero_serie|default_if_none:'' }}</td>
-                <td>{{ terminal.data_instalacao|default_if_none:'' }}</td>
-                <td>
-                    {% if terminal.usuario %}
-                        <a href="{% url 'ver_cliente' terminal.usuario.pk %}">{{ terminal.usuario|default_if_none:'' }}</a>
-                    {% endif %}
-                </td>
-                <td>{% if terminal.is_active %}Não{% else %}Sim{% endif %}</td>
-                <td>
-                    <a class="btn btn-primary btn-sm" href="{% url 'ver_terminal' terminal.pk %}"><i class="fa-solid fa-eye"></i></a>
-                    <a class="btn btn-primary btn-sm" href="{% url 'editar_terminal' terminal.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>
-                    {% if terminal.is_active %}
-                        <a class="btn btn-primary btn-sm btn-remover" href="{% url 'remover_terminal' terminal.pk %}">
-                            <i class="fa-solid fa-trash"></i>
-                        </a>
-                    {% else %}
-                        <a class="btn btn-primary btn-sm btn-remover" href="{% url 'reativar_terminal' terminal.pk %}">
-                            <i class="fa-solid fa-rotate-left"></i>
-                        </a>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="card col-lg-12 mt-5">
+    <div class="card-title">
+        <h3 class="titulo-pagina m-2">Cadastro de Terminais</h3>
+    </div>
+    <div class="card-body">
+        <a class="btn btn-primary btn-sm mx-2 my-4" href="{% url 'adicionar_terminal' %}"><i class="fa-solid fa-plus"></i> Adicionar Terminal</a>
+        <table class="table table-borderless my-2">
+            <thead>
+                <tr>
+                    <th>Número de série</th>
+                    <th>Data de instalação</th>
+                    <th>Cliente</th>
+                    <th>Removido</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for terminal in lista_terminais %}
+                <tr>
+                    <td>{{ terminal.numero_serie|default_if_none:'' }}</td>
+                    <td>{{ terminal.data_instalacao|default_if_none:'' }}</td>
+                    <td>
+                        {% if terminal.usuario %}
+                            <a href="{% url 'ver_cliente' terminal.usuario.pk %}">{{ terminal.usuario|default_if_none:'' }}</a>
+                        {% endif %}
+                    </td>
+                    <td>{% if terminal.is_active %}Não{% else %}Sim{% endif %}</td>
+                    <td>
+                        <a class="btn btn-primary btn-sm" href="{% url 'ver_terminal' terminal.pk %}"><i class="fa-solid fa-eye"></i></a>
+                        <a class="btn btn-primary btn-sm" href="{% url 'editar_terminal' terminal.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>
+                        {% if terminal.is_active %}
+                            <a class="btn btn-primary btn-sm btn-remover" href="{% url 'remover_terminal' terminal.pk %}">
+                                <i class="fa-solid fa-trash"></i>
+                            </a>
+                        {% else %}
+                            <a class="btn btn-primary btn-sm btn-remover" href="{% url 'reativar_terminal' terminal.pk %}">
+                                <i class="fa-solid fa-rotate-left"></i>
+                            </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}

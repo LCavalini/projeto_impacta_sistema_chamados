@@ -14,7 +14,7 @@ class AdicionarChamado(PermissionRequiredMixin, CreateView):
     template_name = 'cliente/chamados/adicionar.html'
     success_url = reverse_lazy('index_chamado')
     login_url = 'autenticar_usuario'
-    permission_required = 'add_chamado'
+    permission_required = 'chamados.add_chamado'
 
 
 class IndexChamados(PermissionRequiredMixin, ListView):
@@ -22,10 +22,10 @@ class IndexChamados(PermissionRequiredMixin, ListView):
     template_name = 'cliente/chamados/index.html'
     context_object_name = 'lista_chamados'
     login_url = 'autenticar_usuario'
-    permission_required = 'view_chamado'
+    permission_required = 'chamados.view_chamado'
 
 
 class IndexCliente(PermissionRequiredMixin, TemplateView):
     template_name = 'cliente/index.html'
     login_url = 'autenticar_usuario'
-    permission_required = 'add_chamado'
+    permission_required = 'chamados.add_chamado'

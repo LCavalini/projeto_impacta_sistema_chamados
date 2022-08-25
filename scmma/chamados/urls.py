@@ -1,6 +1,7 @@
 from django.urls import path
 
-from .views.generico import AutenticarUsuario, DesautenticarUsuario, Index, RedefinirSenha
+from .views.generico import (AutenticarUsuario, DesautenticarUsuario, Index, RedefinirSenha, RedefinirSenhaCompleta,
+                             RedefinirSenhaConfirmar, RedefinirSenhaEnviado)
 from .views.cliente import AdicionarChamado, IndexChamados, IndexCliente
 from .views.admin import (AdicionarTerminal, EditarTerminal, IndexAdmin, IndexClientes, AdicionarCliente,
                           EditarCliente, IndexTerminal, ReativarCliente, ReativarTerminal, RemoverCliente,
@@ -26,5 +27,8 @@ urlpatterns = [
     path('login/', AutenticarUsuario.as_view(), name='autenticar_usuario'),
     path('logout/', DesautenticarUsuario.as_view(), name='desautenticar_usuario'),
     path('redefinir/', RedefinirSenha.as_view(), name='redefinir_senha'),
+    path('redefinir/enviado', RedefinirSenhaEnviado.as_view(), name='redefinir_senha_enviado'),
+    path('redefinir/confirmar/<uidb64>/<token>/', RedefinirSenhaConfirmar.as_view(), name='redefinir_senha_confirmar'),
+    path('redefinir/completo', RedefinirSenhaCompleta.as_view(), name='redefinir_senha_completo'),
     path('', Index.as_view(), name='index')
 ]

@@ -15,7 +15,7 @@ class AdicionarCliente(PermissionRequiredMixin, CreateView):
     form_class = AdicionarClienteForm
     success_url = reverse_lazy('admin_index_cliente')
     login_url = 'autenticar_usuario'
-    permission_required = 'add_usuario'
+    permission_required = 'chamados.add_usuario'
 
     def form_valid(self, form):
         usuario = form.save()
@@ -33,7 +33,7 @@ class IndexClientes(PermissionRequiredMixin, ListView):
     template_name = 'admin/clientes/index.html'
     context_object_name = 'lista_clientes'
     login_url = 'autenticar_usuario'
-    permission_required = 'view_usuario'
+    permission_required = 'chamados.view_usuario'
 
 
 class EditarCliente(PermissionRequiredMixin, UpdateView):
@@ -42,15 +42,15 @@ class EditarCliente(PermissionRequiredMixin, UpdateView):
     form_class = AdicionarClienteForm
     success_url = reverse_lazy('admin_index_cliente')
     login_url = 'autenticar_usuario'
-    permission_required = 'change_usuario'
+    permission_required = 'chamados.change_usuario'
 
 
 class VerCliente(PermissionRequiredMixin, DetailView):
     model = Usuario
     template_name = 'admin/clientes/ver.html'
-    context_object_name = 'cliente'
+    context_object_name = 'usuario'
     login_url = 'autenticar_usuario'
-    permission_required = 'view_usuario'
+    permission_required = 'chamados.view_usuario'
 
 
 class RemoverCliente(PermissionRequiredMixin, DeleteView):
@@ -58,7 +58,7 @@ class RemoverCliente(PermissionRequiredMixin, DeleteView):
     template_name = 'admin/clientes/remover.html'
     success_url = reverse_lazy('admin_index_cliente')
     login_url = 'autenticar_usuario'
-    permission_required = 'delete_usuario'
+    permission_required = 'chamados.delete_usuario'
 
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -76,7 +76,7 @@ class ReativarCliente(PermissionRequiredMixin, UpdateView):
     success_url = reverse_lazy('admin_index_cliente')
     login_url = 'autenticar_usuario'
     form_class = ReativarClienteForm
-    permission_required = 'delete_usuario'
+    permission_required = 'chamados.delete_usuario'
 
     def form_valid(self, form):
         self.object.is_active = True
@@ -89,7 +89,7 @@ class AdicionarTerminal(PermissionRequiredMixin, CreateView):
     form_class = AdicionarTerminalForm
     success_url = reverse_lazy('admin_index_terminal')
     login_url = 'autenticar_usuario'
-    permission_required = 'add_terminal'
+    permission_required = 'chamados.add_terminal'
 
 
 class IndexTerminal(PermissionRequiredMixin, ListView):
@@ -97,7 +97,7 @@ class IndexTerminal(PermissionRequiredMixin, ListView):
     template_name = 'admin/terminais/index.html'
     context_object_name = 'lista_terminais'
     login_url = 'autenticar_usuario'
-    permission_required = 'view_terminal'
+    permission_required = 'chamados.view_terminal'
 
 
 class EditarTerminal(PermissionRequiredMixin, UpdateView):
@@ -106,7 +106,7 @@ class EditarTerminal(PermissionRequiredMixin, UpdateView):
     form_class = AdicionarTerminalForm
     success_url = reverse_lazy('admin_index_terminal')
     login_url = 'autenticar_usuario'
-    permission_required = 'change_terminal'
+    permission_required = 'chamados.change_terminal'
 
 
 class VerTerminal(PermissionRequiredMixin, DetailView):
@@ -114,7 +114,7 @@ class VerTerminal(PermissionRequiredMixin, DetailView):
     template_name = 'admin/terminais/ver.html'
     context_object_name = 'terminal'
     login_url = 'autenticar_usuario'
-    permission_required = 'view_terminal'
+    permission_required = 'chamados.view_terminal'
 
 
 class RemoverTerminal(PermissionRequiredMixin, DeleteView):
@@ -122,7 +122,7 @@ class RemoverTerminal(PermissionRequiredMixin, DeleteView):
     template_name = 'admin/terminais/remover.html'
     success_url = reverse_lazy('admin_index_terminal')
     login_url = 'autenticar_usuario'
-    permission_required = 'delete_terminal'
+    permission_required = 'chamados.delete_terminal'
 
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -140,7 +140,7 @@ class ReativarTerminal(PermissionRequiredMixin, UpdateView):
     success_url = reverse_lazy('admin_index_terminal')
     login_url = 'autenticar_usuario'
     form_class = ReativarTerminalForm
-    permission_required = 'delete_terminal'
+    permission_required = 'chamados.delete_terminal'
 
     def form_valid(self, form):
         self.object.is_active = True
@@ -150,4 +150,4 @@ class ReativarTerminal(PermissionRequiredMixin, UpdateView):
 class IndexAdmin(PermissionRequiredMixin, TemplateView):
     template_name = 'admin/index.html'
     login_url = 'autenticar_usuario'
-    permission_required = 'add_usuario'
+    permission_required = 'chamados.add_usuario'
