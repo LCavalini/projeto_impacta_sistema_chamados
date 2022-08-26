@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}SCMMA - Senha redefinida{% endblock %}
+
+{% block content %}
+<div class="card col-lg-8 offset-lg-2 col-md-12 mt-5">
+    <div class="card-title">
+        <h1>SCMMA</h1>
+        <h3>A senha foi redefinida!</h3>
+    </div>
+    <div class="card-body">
+        <p>A nova senha foi registrada com sucesso. <a href="{% url 'autenticar_usuario' %}">Autentique-se</a> no sistema.</p>
+    </div>
+</div>
+{% endblock %}

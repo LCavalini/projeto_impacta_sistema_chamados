@@ -1,0 +1,33 @@
+form.form-login input {
+    width: 300px;
+}
+
+form.form-login .btn {
+    width: 100px;
+}
+
+form.form-cadastro input {
+    width: 300px;
+}
+
+form.form-cadastro .btn {
+    width: 100px;
+}
+
+
+.card {
+    border: 0;
+    padding: 10px;
+}
+
+.card-title {
+    text-align: center;
+}
+
+.errorlist {
+    list-style: none;
+}
+
+.titulo-pagina {
+    text-align: center;
+}

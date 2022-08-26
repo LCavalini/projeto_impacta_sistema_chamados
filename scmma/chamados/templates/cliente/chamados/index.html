@@ -1,0 +1,30 @@
+{% extends 'cliente/base.html' %}
+
+{% block title %}SCMMA - Área do Cliente - Chamados{% endblock %}
+
+{% block content %}
+<div class="card col-lg-12 mt-5">
+    <div class="card-title">
+        <h3 class="titulo-pagina m-2">Chamados</h3>
+    </div>
+    <div class="card-body">
+        <a class="btn btn-primary btn-sm mx-2 my-4" href="{% url 'adicionar_chamado' %}"><i class="fa-solid fa-plus"></i> Adicionar Chamado</a>
+        <table class="table table-borderless my-2">
+            <thead>
+                <tr>
+                    <th>Terminal</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for chamado in chamados %}
+                <tr>
+                    <td>{{ chamado.terminal|default_if_none:'' }}</td>
+                    <td>{{ chamado.opcao_estado }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

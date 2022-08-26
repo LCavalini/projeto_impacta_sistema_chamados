@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}SCMMA - Alteração de senha{% endblock %}
+
+{% block content %}
+
+{% if validlink %}
+
+<div class="card col-lg-8 offset-lg-2 col-md-12 mt-5">
+  <div class="card-title">
+      <h1>SCMMA</h1>
+      <h3>Crie uma nova senha</h3>
+  </div>
+  <div class="card-body">
+    {% if form.errors %}
+    <div class="alert alert-danger m-1">
+        {% for field, error in form.errors.items %}
+            {{ error }}
+        {% endfor %}
+    </div>
+    {% endif %}
+    <form method="POST" class="form-login">
+      {% csrf_token %}
+      <div class="row justify-content-center my-2">
+        <div class="col-lg-3">{{ form.new_password1.label_tag }}</div>
+        <div class="col-lg-8">{{ form.new_password1 }}</div>
+      </div>
+      <div class="row justify-content-center my-2">
+        <div class="col-lg-3">Confirmação: </div>
+        <div class="col-lg-8">{{ form.new_password2 }}</div>
+      </div>
+      <div class="row justify-content-center mt-4">
+          <input type="submit" class="btn btn-primary mb-2" value="Enviar">
+          <input type="hidden" name="next" value="{{ next }}">
+      </div>
+    </form>
+  </div>
+</div>
+
+{% else %}
+
+<p>O link de redefinição de senha é inválido ou já foi utilizado anteriormente.
+    Clique novamente em <a href="{% url 'redefinir_senha' %}">redefinir senha</a> e siga os passos.</p>
+
+{% endif %}
+{% endblock %}

@@ -1,0 +1,15 @@
+{% load i18n %}{% autoescape off %}
+Este email é uma resposta à solicitação de redefinição de senha da sua conta no SCMMA.
+
+Acesse a seguinte página e crie uma nova senha:
+
+{% block reset_link %}
+{{ protocol }}://{{ domain }}{% url 'redefinir_senha_confirmar' uidb64=uid token=token %}
+{% endblock %}
+
+Obrigado por usar o SCMMA!
+
+Atenciosamente,
+Equipe do SCMMA.
+
+{% endautoescape %}
