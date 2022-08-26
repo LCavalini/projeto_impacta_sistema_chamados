@@ -14,7 +14,6 @@
                 <tr>
                     <th>Nome</th>
                     <th>Email</th>
-                    <th>Removido</th>
                     <th></th>
                 </tr>
             </thead>
@@ -24,7 +23,6 @@
                     <tr>
                         <td>{{ cliente.get_full_name|default_if_none:'' }}</td>
                         <td>{{ cliente.email|default_if_none:'' }}</td>
-                        <td>{% if cliente.is_active %}Não{% else %}Sim{% endif %}</td>
                         <td>
                             <a class="btn btn-primary btn-sm" href="{% url 'ver_cliente' cliente.pk %}"><i class="fa-solid fa-eye"></i></a>
                             <a class="btn btn-primary btn-sm" href="{% url 'editar_cliente' cliente.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>

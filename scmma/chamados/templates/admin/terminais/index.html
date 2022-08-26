@@ -15,7 +15,6 @@
                     <th>Número de série</th>
                     <th>Data de instalação</th>
                     <th>Cliente</th>
-                    <th>Removido</th>
                     <th></th>
                 </tr>
             </thead>
@@ -29,7 +28,6 @@
                             <a href="{% url 'ver_cliente' terminal.usuario.pk %}">{{ terminal.usuario|default_if_none:'' }}</a>
                         {% endif %}
                     </td>
-                    <td>{% if terminal.is_active %}Não{% else %}Sim{% endif %}</td>
                     <td>
                         <a class="btn btn-primary btn-sm" href="{% url 'ver_terminal' terminal.pk %}"><i class="fa-solid fa-eye"></i></a>
                         <a class="btn btn-primary btn-sm" href="{% url 'editar_terminal' terminal.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>
