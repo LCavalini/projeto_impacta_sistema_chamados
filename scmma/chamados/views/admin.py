@@ -20,6 +20,7 @@ class AdicionarCliente(PermissionRequiredMixin, CreateView):
     def form_valid(self, form):
         usuario = form.save()
         usuario.tipo_usuario = 0  # tipo de usuário é Cliente
+        usuario.set_password(Usuario.objects.make_random_password())
         permissoes = [
             Permission.objects.get(codename='add_chamado'),
             Permission.objects.get(codename='view_chamado')
