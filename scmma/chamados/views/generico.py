@@ -1,10 +1,10 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import (LoginView, LogoutView, PasswordResetView, PasswordResetConfirmView,
                                        PasswordResetCompleteView)
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views import View
-from django.views.generic import TemplateView
 from django.shortcuts import HttpResponseRedirect
 from django.urls import reverse_lazy
+from django.views import View
+from django.views.generic import TemplateView
 
 from ..forms import AutenticarUsuarioForm, RedefinirSenhaForm
 
@@ -44,7 +44,7 @@ class RedefinirSenhaCompleta(PasswordResetCompleteView):
 class Index(LoginRequiredMixin, View):
     login_url = 'autenticar_usuario'
 
-    def get(self, request):
+    def get(self, request) -> HttpResponseRedirect:
         if request.user.tipo_usuario == 'Cliente':
             return HttpResponseRedirect(reverse_lazy('index_cliente'))
         elif request.user.tipo_usuario == 'Administrador':

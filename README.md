@@ -13,8 +13,31 @@ Este projeto foi desenvolvido para a avaliação da disciplina **Software Produc
 ## Como usar este repositório em ambiente local
 
 1. Baixar e instalar as ferramentas necessárias.
-2. Abrir um terminal Linux ou o Windows Powershell no diretório desejado e digitar ``git clone https://github.com/LCavalini/scmma.git``.
+2. Abrir um terminal Linux ou o Windows Powershell no diretório onde deseja armazenar o projeto e digitar ``git clone https://github.com/LCavalini/scmma.git``.
 3. Criar um ambiente virtual: ``python -m venv venv`` (Windows) ou ``python3 -m venv venv`` (Linux).
 4. Ativar o ambiente virtual: ``.\venv\Scripts\activate`` (Windows) ou ``source ./venv/bin/activate`` (Linux).
 5. Instalar as dependências do projeto: ``pip install -r requirements.txt``.
-6. Testar a aplicação web em ambiente local: ``python ./scmma/manage.py runserver``
+6. Criar as migrações do banco de dados: ``python ./scmma/manage.py makemigrations chamados`` (Windows) ou ``python3 ./scmma/manage.py makemigrations chamados`` (Linux).
+7. Alterar o banco de dados: ``python ./scmma/manage.py migrate`` (Windows) ou ``python3 ./scmma/manage.py migrate`` (Linux).
+8. Criar o usuário administrador: ``python ./scmma/manage.py createsuperuser`` (Windows) ou ``python3 ./scmma/manage.py createsuperuser`` (Linux).
+9. Criar um arquivo de credenciais conforme a seção  [Como criar um arquivo de credenciais para envio de emails](#como-criar-um-arquivo-de-credenciais-para-envio-de-emails).
+10. Testar a aplicação web em ambiente local: ``python ./scmma/manage.py runserver`` (Windows) ou ``python3 ./scmma/manage.py runserver`` (Linux).
+
+## Como executar os testes automáticos
+
+Digitar o comando abaixo no terminal:
+
+``python ./scmma/manage.py test chamados/tests`` (Windows) ou ``python3 ./scmma/manage.py test chamados/tests`` (Linux).
+
+## Como criar um arquivo de credenciais para envio de emails
+
+1. Crie um arquivo com o nome ``credenciais.json`` no diretório ``scmma/scmma`` (onde se encontra o arquivo ``settings.py``).
+2. Escreva no arquivo o conteúdo abaixo:
+
+
+ ```
+    {
+        "EMAIL_HOST_USER": "SUBSTITUA PELO SEU E-MAIL DO DOMÍNIO GMAIL",
+        "EMAIL_HOST_PASSWORD": "SUBSTITUA PELA SUA SENHA DE E-MAIL"
+    }
+ ```

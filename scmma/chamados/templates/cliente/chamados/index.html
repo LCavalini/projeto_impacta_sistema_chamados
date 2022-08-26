@@ -17,7 +17,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for chamado in lista_chamados %}
+                {% for chamado in chamados %}
                 <tr>
                     <td>{{ chamado.terminal|default_if_none:'' }}</td>
                     <td>{{ chamado.opcao_estado }}</td>

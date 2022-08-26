@@ -18,7 +18,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for cliente in lista_clientes %}
+                {% for cliente in clientes %}
                     {% if cliente.tipo_usuario == 'Cliente' %}
                     <tr>
                         <td>{{ cliente.get_full_name|default_if_none:'' }}</td>

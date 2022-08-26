@@ -19,7 +19,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for terminal in lista_terminais %}
+                {% for terminal in terminais %}
                 <tr>
                     <td>{{ terminal.numero_serie|default_if_none:'' }}</td>
                     <td>{{ terminal.data_instalacao|default_if_none:'' }}</td>

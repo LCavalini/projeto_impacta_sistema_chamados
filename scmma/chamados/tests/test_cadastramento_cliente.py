@@ -1,17 +1,18 @@
 from django.test import Client, TestCase
-from chamados.models import Usuario
 from django.urls import reverse_lazy
+
+from chamados.models import Usuario
 
 
 class TestCadastramentoCliente(TestCase):
 
-    def setUp(self):
-        self.cliente = Client()
+    def setUp(self) -> None:
+        self.cliente_web = Client()
         self.admin = Usuario(email='admin@admin.com', password='123', is_superuser=True)
         self.admin.save()
-        self.cliente.force_login(self.admin)
+        self.cliente_web.force_login(self.admin)
 
-    def test_adicionar_cliente_valido(self):
+    def test_adicionar_cliente_valido(self) -> None:
         dados = {
             'email': 'joao.silva@gmail.com',
             'first_name': 'João',
@@ -22,16 +23,16 @@ class TestCadastramentoCliente(TestCase):
             'telefone': ''
         }
         caminho = reverse_lazy('adicionar_cliente')
-        resposta = self.cliente.post(caminho, data=dados, format=dict)
+        resposta = self.cliente_web.post(caminho, data=dados, format=dict)
         resultado = resposta
         esperado = reverse_lazy('admin_index_cliente')
         self.assertRedirects(resultado, esperado)  # teste da requisição
         usuario = Usuario.objects.get(email=dados['email'])
         resultado = usuario.get_full_name()
-        esperado = 'João Silva'
+        esperado = ' '.join([dados['first_name'], dados['last_name']])
         self.assertEqual(resultado, esperado)  # teste de banco de dados
 
-    def test_adicionar_cliente_email_invalido(self):
+    def test_adicionar_cliente_email_invalido(self) -> None:
         dados = {
             'email': 'joao.silvagmail.com',
             'first_name': 'João',
@@ -42,15 +43,14 @@ class TestCadastramentoCliente(TestCase):
             'telefone': ''
         }
         caminho = reverse_lazy('adicionar_cliente')
-        resposta = self.cliente.post(caminho, data=dados, format=dict)
+        resposta = self.cliente_web.post(caminho, data=dados, format=dict)
         resultado = resposta.status_code
         esperado = 200
-        self.assertEqual(resultado, esperado)  # teste da requisição (deve retornar a página)
+        self.assertEqual(resultado, esperado)  # teste da requisição (deve retornar a própria página)
         with self.assertRaises(Usuario.DoesNotExist):  # não pode ter criado o cliente
-            usuario = Usuario.objects.get(email=dados['email'])
-            resultado = usuario.get_full_name()
+            Usuario.objects.get(email=dados['email'])
 
-    def test_editar_cliente_valido(self):
+    def test_editar_cliente_valido(self) -> None:
         dados_criacao = {
             'email': 'maria.silva@gmail.com',
             'first_name': 'Maria',
@@ -73,7 +73,7 @@ class TestCadastramentoCliente(TestCase):
         usuario_criado.save()
         pk = Usuario.objects.get(email=dados_criacao['email']).pk
         caminho = reverse_lazy('editar_cliente', kwargs={'pk': pk})
-        resposta = self.cliente.post(caminho, data=dados_edicao, format=dict)
+        resposta = self.cliente_web.post(caminho, data=dados_edicao, format=dict)
         resultado = resposta
         esperado = reverse_lazy('admin_index_cliente')
         self.assertRedirects(resultado, esperado)  # teste da requisição
@@ -82,7 +82,7 @@ class TestCadastramentoCliente(TestCase):
         esperado = dados_edicao['telefone']
         self.assertEqual(resultado, esperado)  # teste de banco de dados
 
-    def test_editar_cliente_email_invalido(self):
+    def test_editar_cliente_email_invalido(self) -> None:
         dados_criacao = {
             'email': 'maria.silva@gmail.com',
             'first_name': 'Maria',
@@ -105,16 +105,16 @@ class TestCadastramentoCliente(TestCase):
         usuario_criado.save()
         pk = Usuario.objects.get(email=dados_criacao['email']).pk
         caminho = reverse_lazy('editar_cliente', kwargs={'pk': pk})
-        resposta = self.cliente.post(caminho, data=dados_edicao, format=dict)
+        resposta = self.cliente_web.post(caminho, data=dados_edicao, format=dict)
         resultado = resposta.status_code
         esperado = 200
-        self.assertEqual(resultado, esperado)  # teste da requisição
+        self.assertEqual(resultado, esperado)  # teste da requisição (retorna a própria página)
         usuario_editado = Usuario.objects.get(email=dados_criacao['email'])
         resultado = usuario_editado.telefone
         esperado = dados_criacao['telefone']
-        self.assertEqual(resultado, esperado)  # teste de banco de dados (telefone não pode ser alterado)
+        self.assertEqual(resultado, esperado)  # teste de banco de dados (telefone não pode ter sido alterado)
 
-    def test_remover_cliente_valido(self):
+    def test_remover_cliente_valido(self) -> None:
         dados = {
             'email': 'marcos.silva@gmail.com',
             'first_name': 'Marcos',
@@ -124,7 +124,7 @@ class TestCadastramentoCliente(TestCase):
         usuario_criado.save()
         pk = Usuario.objects.get(email=dados['email']).pk
         caminho = reverse_lazy('remover_cliente', kwargs={'pk': pk})
-        resposta = self.cliente.post(caminho)
+        resposta = self.cliente_web.post(caminho)
         resultado = resposta
         esperado = reverse_lazy('admin_index_cliente')
         self.assertRedirects(resultado, esperado)  # teste da requisição
@@ -145,7 +145,7 @@ class TestCadastramentoCliente(TestCase):
         resultado = usuario_criado.is_active  # o atributo deve ter sido gravado como falso
         self.assertFalse(resultado)
         caminho = reverse_lazy('reativar_cliente', kwargs={'pk': pk})
-        resposta = self.cliente.post(caminho)
+        resposta = self.cliente_web.post(caminho)
         resultado = resposta
         esperado = reverse_lazy('admin_index_cliente')
         self.assertRedirects(resultado, esperado)  # teste da requisição

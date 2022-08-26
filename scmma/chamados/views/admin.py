@@ -1,9 +1,9 @@
-from django.http import HttpResponseRedirect
+from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.auth.models import Permission
+from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic import ListView, DeleteView, DetailView, TemplateView
-from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.contrib.auth.models import Permission
 
 from ..forms import AdicionarClienteForm, AdicionarTerminalForm, ReativarClienteForm, ReativarTerminalForm
 from ..models import Usuario, Terminal
@@ -17,10 +17,10 @@ class AdicionarCliente(PermissionRequiredMixin, CreateView):
     login_url = 'autenticar_usuario'
     permission_required = 'chamados.add_usuario'
 
-    def form_valid(self, form):
+    def form_valid(self, form) -> HttpResponse:
         usuario = form.save()
         usuario.tipo_usuario = 0  # tipo de usuário é Cliente
-        usuario.set_password(Usuario.objects.make_random_password())
+        usuario.set_password(Usuario.objects.make_random_password())  # gera uma senha aleatória inicial
         permissoes = [
             Permission.objects.get(codename='add_chamado'),
             Permission.objects.get(codename='view_chamado')
@@ -32,7 +32,7 @@ class AdicionarCliente(PermissionRequiredMixin, CreateView):
 class IndexClientes(PermissionRequiredMixin, ListView):
     model = Usuario
     template_name = 'admin/clientes/index.html'
-    context_object_name = 'lista_clientes'
+    context_object_name = 'clientes'
     login_url = 'autenticar_usuario'
     permission_required = 'chamados.view_usuario'
 
@@ -61,13 +61,16 @@ class RemoverCliente(PermissionRequiredMixin, DeleteView):
     login_url = 'autenticar_usuario'
     permission_required = 'chamados.delete_usuario'
 
-    def delete(self, request, *args, **kwargs):
+    def delete(self, request, *args, **kwargs) -> HttpResponseRedirect:
+        """
+        Exclui os usuários de forma não definitiva (apenas altera o atributo is_active).
+        """
         self.object = self.get_object()
         self.object.is_active = False
         self.object.save()
         return HttpResponseRedirect(self.get_success_url())
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs) -> HttpResponseRedirect:
         return self.delete(request, *args, **kwargs)
 
 
@@ -79,7 +82,7 @@ class ReativarCliente(PermissionRequiredMixin, UpdateView):
     form_class = ReativarClienteForm
     permission_required = 'chamados.delete_usuario'
 
-    def form_valid(self, form):
+    def form_valid(self, form) -> HttpResponse:
         self.object.is_active = True
         return super().form_valid(form)
 
@@ -96,7 +99,7 @@ class AdicionarTerminal(PermissionRequiredMixin, CreateView):
 class IndexTerminal(PermissionRequiredMixin, ListView):
     model = Terminal
     template_name = 'admin/terminais/index.html'
-    context_object_name = 'lista_terminais'
+    context_object_name = 'terminais'
     login_url = 'autenticar_usuario'
     permission_required = 'chamados.view_terminal'
 
@@ -125,13 +128,16 @@ class RemoverTerminal(PermissionRequiredMixin, DeleteView):
     login_url = 'autenticar_usuario'
     permission_required = 'chamados.delete_terminal'
 
-    def delete(self, request, *args, **kwargs):
+    def delete(self, request, *args, **kwargs) -> HttpResponseRedirect:
+        """
+        Exclui os terminais de forma não definitiva (apenas altera o atributo is_active).
+        """
         self.object = self.get_object()
         self.object.is_active = False
         self.object.save()
         return HttpResponseRedirect(self.get_success_url())
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs) -> HttpResponseRedirect:
         return self.delete(request, *args, **kwargs)
 
 
@@ -143,7 +149,7 @@ class ReativarTerminal(PermissionRequiredMixin, UpdateView):
     form_class = ReativarTerminalForm
     permission_required = 'chamados.delete_terminal'
 
-    def form_valid(self, form):
+    def form_valid(self, form) -> HttpResponse:
         self.object.is_active = True
         return super().form_valid(form)
 
