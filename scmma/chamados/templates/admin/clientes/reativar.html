@@ -11,7 +11,7 @@
             {% for campo, valor in usuario.get_fields_cliente %}
             <tr>
                 <td>{{ campo }}</td>
-                <td>{{ valor }}</td>
+                <td>{{ valor|default_if_none:'' }}</td>
             </tr>
             {% endfor %}
         </table>
