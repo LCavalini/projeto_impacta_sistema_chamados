@@ -10,6 +10,15 @@ form.form-cadastro input {
     width: 300px;
 }
 
+form.form-cadastro select {
+    width: 300px;
+}
+
+form.form-cadastro textarea {
+    width: 300px;
+    resize: none;
+}
+
 form.form-cadastro .btn {
     width: 100px;
 }

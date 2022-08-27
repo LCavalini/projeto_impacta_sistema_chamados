@@ -15,7 +15,7 @@ class TestCadastramentoTerminal(TestCase):
     def test_adicionar_terminal_valido(self) -> None:
         dados = {
             'numero_serie': '123',
-            'data_instalacao': '2022-05-08'
+            'rua': 'Praça da Sé'
         }
         caminho = reverse_lazy('adicionar_terminal')
         resposta = self.cliente_web.post(caminho, data=dados, format=dict)
@@ -23,8 +23,8 @@ class TestCadastramentoTerminal(TestCase):
         esperado = reverse_lazy('admin_index_terminal')
         self.assertRedirects(resultado, esperado)  # teste da requisição
         terminal = Terminal.objects.get(numero_serie=dados['numero_serie'])
-        resultado = terminal.data_instalacao
-        esperado = dados['data_instalacao']
+        resultado = terminal.rua
+        esperado = dados['rua']
         self.assertEqual(resultado, esperado)  # teste de banco de dados
 
     def test_adicionar_terminal_invalido(self) -> None:
@@ -97,7 +97,7 @@ class TestCadastramentoTerminal(TestCase):
             'bairro': 'Sé',
             'cidade': 'São Paulo',
             'estado': 'SP',
-            'cep': '013102000'  # cep inválido
+            'cep': '013102-000'  # cep inválido
         }
         terminal_criado = Terminal(**dados_criacao)
         terminal_criado.save()

@@ -18,12 +18,12 @@ class TestCadastramentoChamados(TestCase):
         self.usuario_cliente.user_permissions.set(permissoes)
         self.usuario_cliente.save()
         self.cliente_web.force_login(self.usuario_cliente)
-        self.terminal = Terminal(numero_serie='123')
+        self.terminal = Terminal(numero_serie='123', usuario=self.usuario_cliente)
         self.terminal.save()
 
     def test_abrir_chamado(self) -> None:
         dados = {
-            'tipo': 'Erro de leitura de cartão',
+            'tipo': 'erro_leitura_cartao',
             'descricao': 'A máquina não está conseguindo ler os cartões dos usuários',
             'gravidade': 1,
             'usuario': self.usuario_cliente.pk,

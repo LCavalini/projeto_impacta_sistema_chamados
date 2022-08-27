@@ -11,7 +11,7 @@
             {% for campo, valor in terminal.get_fields %}
             <tr>
                 <td>{{ campo }}</td>
-                <td>{{ valor }}</td>
+                <td>{{ valor|default_if_none:'' }}</td>
             </tr>
             {% endfor %}
         </table>
