@@ -12,6 +12,8 @@ UserModel = get_user_model()
 
 class AdicionarClienteForm(ModelForm):
 
+    required_css_class = 'campo_obrigatorio'
+
     class Meta:
         model = Usuario
         fields = Usuario.CAMPOS_CLIENTE
@@ -26,9 +28,11 @@ class ReativarClienteForm(ModelForm):
 
 class AdicionarTerminalForm(ModelForm):
 
+    required_css_class = 'campo_obrigatorio'
+
     class Meta:
         model = Terminal
-        fields = ['data_instalacao', 'numero_serie', 'rua', 'numero', 'complemento', 'bairro', 'cidade', 'estado',
+        fields = ['numero_serie', 'data_instalacao', 'rua', 'numero', 'complemento', 'bairro', 'cidade', 'estado',
                   'cep', 'usuario']
 
 
@@ -40,6 +44,8 @@ class ReativarTerminalForm(ModelForm):
 
 
 class AdicionarChamadoForm(ModelForm):
+
+    required_css_class = 'campo_obrigatorio'
 
     class Meta:
         model = Chamado

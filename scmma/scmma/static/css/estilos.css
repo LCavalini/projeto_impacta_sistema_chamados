@@ -40,3 +40,7 @@ form.form-cadastro .btn {
 .titulo-pagina {
     text-align: center;
 }
+
+.campo_obrigatorio:after {
+    content: '*';
+}
