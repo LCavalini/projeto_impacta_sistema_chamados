@@ -1,5 +1,9 @@
 {% extends "cliente/base.html" %}
 
+{% block title %}
+    SCMMA - Área do Cliente
+{% endblock %}
+
 {% block content %}
 <h3 class="titulo-pagina m-3">Área do Cliente</h3>
 <div class="row">
@@ -9,7 +13,7 @@
           <h5 class="card-title">Chamados</h5>
           <p class="card-text">Os chamados são solicitações de manutenção de máquinas de autoatendimento.</p>
           <a href="{% url 'adicionar_chamado' %}" class="btn btn-primary btn-sm m-2"><i class="fa-solid fa-plus"></i> Abrir</a>
-          <a href="{% url 'index_chamado' %}" class="btn btn-primary btn-sm m-2"><i class="fa-solid fa-list"></i> Acessar</a>
+          <a href="{% url 'index_chamado' %}" class="btn btn-primary btn-sm m-2"><i class="fa-solid fa-arrow-right"></i> Acessar</a>
         </div>
       </div>
     </div>

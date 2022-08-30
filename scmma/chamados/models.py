@@ -26,6 +26,7 @@ class GerenciadorUsuario(BaseUserManager):
         usuario.is_staff = True
         usuario.tipo_usuario = 2  # Usuário do tipo Administrador
         usuario.first_name = 'Administrador'
+        usuario.last_name = 'Geral'
         usuario.save(using=self._db)
         return usuario
 
