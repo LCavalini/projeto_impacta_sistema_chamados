@@ -1,0 +1,48 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}
+    SCMMA - Área do Administrador - Cadastro de Técnicos
+{% endblock %}
+
+{% block content %}
+<div class="card col-lg-12 mt-5">
+    <div class="card-title">
+        <h3 class="titulo-pagina m-2">Cadastro de Técnicos</h3>
+    </div>
+    <div class="card-body">
+        <a class="btn btn-primary btn-sm mx-2" href="{% url 'adicionar_tecnico' %}"><i class="fa-solid fa-plus"></i> Adicionar Técnico</a>
+        <table class="table table-borderless table-resposive my-2">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tecnico in tecnicos %}
+                    {% if tecnico.tipo_usuario == 'Técnico' %}
+                    <tr>
+                        <td>{{ tecnico.get_full_name|default_if_none:'' }}</td>
+                        <td>{{ tecnico.email|default_if_none:'' }}</td>
+                        <td>
+                            <a class="btn btn-primary btn-sm" href="{% url 'ver_tecnico' tecnico.pk %}"><i class="fa-solid fa-eye"></i></a>
+                            <a class="btn btn-primary btn-sm" href="{% url 'editar_tecnico' tecnico.pk %}"><i class="fa-solid fa-pen-to-square"></i></a>
+                            {% if tecnico.is_active %}
+                                <a class="btn btn-primary btn-sm btn-remover" href="{% url 'remover_tecnico' tecnico.pk %}">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            {% else %}
+                                <a class="btn btn-primary btn-sm btn-remover" href="{% url 'reativar_tecnico' tecnico.pk %}">
+                                    <i class="fa-solid fa-rotate-left"></i>
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

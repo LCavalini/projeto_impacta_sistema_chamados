@@ -33,11 +33,17 @@ class GerenciadorUsuario(BaseUserManager):
 
 class Usuario(AbstractUser):
     TIPOS_USUARIOS = (
-        (0, 'Cliente'),
-        (1, 'Técnico'),
-        (2, 'Administrador'),
+        (0, 'Cliente', ),
+        (1, 'Técnico', ),
+        (2, 'Administrador', ),
+    )
+    OPCOES_NIVEIS = (
+        (0, 'Nível 1', ),
+        (1, 'Nível 2',),
+        (2, 'Nível 3', ),
     )
     CAMPOS_CLIENTE = ('email', 'first_name', 'last_name', 'data_nascimento', 'cpf', 'cnpj', 'telefone', )
+    CAMPOS_TECNICO = ('email', 'first_name', 'last_name', 'data_nascimento', 'cpf', 'telefone', 'nivel', )
     username = models.CharField('Nome de Usuário', max_length=150, null=True, blank=True)
     email = models.EmailField('Email', unique=True)
     data_nascimento = models.DateField('Data de nascimento', null=True, blank=True)
@@ -48,6 +54,8 @@ class Usuario(AbstractUser):
     last_name = models.CharField('Sobrenome', max_length=150, null=True)
     _tipo_usuario = models.PositiveSmallIntegerField('Tipo de usuário', choices=TIPOS_USUARIOS, default=0,
                                                      db_column='tipo_usuario')
+    nivel = models.PositiveSmallIntegerField('Nível', choices=OPCOES_NIVEIS, null=True)
+    ultima_localizacao = models.CharField('Última localização', max_length=200, null=True, blank=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
     objects = GerenciadorUsuario()
@@ -56,6 +64,10 @@ class Usuario(AbstractUser):
         return [(field.verbose_name, field.value_from_object(self))
                 for field in self.__class__._meta.fields if field.name in self.CAMPOS_CLIENTE]
 
+    def get_fields_tecnico(self) -> tuple:
+        return [(field.verbose_name, field.value_from_object(self))
+                for field in self.__class__._meta.fields if field.name in self.CAMPOS_TECNICO]
+
     @property
     def tipo_usuario(self) -> str:
         return dict(self.TIPOS_USUARIOS)[self._tipo_usuario]
@@ -63,6 +75,10 @@ class Usuario(AbstractUser):
     @tipo_usuario.setter
     def tipo_usuario(self, valor):
         self._tipo_usuario = valor
+
+    def tecnico_ocupado(self):
+        # verifica se o técnico tem algum chamado com o estado "Em atendimento"
+        return Atendimento.objects.filter(chamado__estado=2, tecnico=self.pk, transferido=False).exists()
 
     def __str__(self) -> str:
         return self.get_full_name()
@@ -124,8 +140,9 @@ class Chamado(models.Model):
     ESTADOS = (
         (0, 'Aberto'),
         (1, 'Alocado'),
-        (2, 'Transferido'),
-        (3, 'Encerrado'),
+        (2, 'Em antendimento'),
+        (3, 'Transferido'),
+        (4, 'Encerrado'),
     )
     NIVEIS_GRAVIDADE = (
         (0, 'Baixa'),
@@ -148,3 +165,11 @@ class Chamado(models.Model):
     @property
     def opcao_estado(self) -> str:
         return [item[1] for item in self.ESTADOS if item[0] == self.estado][0]
+
+
+class Atendimento(models.Model):
+    tecnico = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    chamado = models.ForeignKey(Chamado, on_delete=models.CASCADE)
+    atividades = models.TextField('Atividades relizadas', null=True, blank=True)
+    transferido = models.BooleanField('Atendimento transferido', default=False)
+    motivo_transferencia = models.TextField('Motivo da transferencia', null=True, blank=True)

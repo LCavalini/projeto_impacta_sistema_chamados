@@ -26,6 +26,22 @@ class ReativarClienteForm(ModelForm):
         fields = []
 
 
+class AdicionarTecnicoForm(ModelForm):
+
+    required_css_class = 'campo_obrigatorio'
+
+    class Meta:
+        model = Usuario
+        fields = Usuario.CAMPOS_TECNICO
+
+
+class ReativarTecnicoForm(ModelForm):
+
+    class Meta:
+        model = Usuario
+        fields = []
+
+
 class AdicionarTerminalForm(ModelForm):
 
     required_css_class = 'campo_obrigatorio'
@@ -34,6 +50,11 @@ class AdicionarTerminalForm(ModelForm):
         model = Terminal
         fields = ['numero_serie', 'data_instalacao', 'rua', 'numero', 'complemento', 'bairro', 'cidade', 'estado',
                   'cep', 'usuario']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # permite somente a seleção de clientes
+        self.fields['usuario'].queryset = Usuario.objects.filter(_tipo_usuario=0)
 
 
 class ReativarTerminalForm(ModelForm):

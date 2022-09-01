@@ -3,9 +3,10 @@ from django.urls import path
 from .views.generico import (AutenticarUsuario, DesautenticarUsuario, Index, RedefinirSenha, RedefinirSenhaCompleta,
                              RedefinirSenhaConfirmar, RedefinirSenhaEnviado)
 from .views.cliente import AdicionarChamado, IndexChamados, IndexCliente
-from .views.admin import (AdicionarTerminal, EditarTerminal, IndexAdmin, IndexClientes, AdicionarCliente,
-                          EditarCliente, IndexTerminal, ReativarCliente, ReativarTerminal, RemoverCliente,
-                          RemoverTerminal, VerCliente, VerTerminal)
+from .views.admin import (AdicionarTecnico, AdicionarTerminal, EditarTerminal, IndexAdmin, IndexClientes,
+                          AdicionarCliente, EditarCliente, IndexTecnicos, IndexTerminal, ReativarCliente,
+                          ReativarTecnico, ReativarTerminal, RemoverCliente, RemoverTecnico, EditarTecnico,
+                          VerTecnico, RemoverTerminal, VerCliente, VerTerminal)
 
 urlpatterns = [
     path('admin/clientes', IndexClientes.as_view(), name='admin_index_cliente'),
@@ -20,6 +21,12 @@ urlpatterns = [
     path('admin/terminais/ver/<int:pk>', VerTerminal.as_view(), name='ver_terminal'),
     path('admin/terminais/remover/<int:pk>', RemoverTerminal.as_view(), name='remover_terminal'),
     path('admin/terminais/reativar/<int:pk>', ReativarTerminal.as_view(), name='reativar_terminal'),
+    path('admin/tecnicos', IndexTecnicos.as_view(), name='admin_index_tecnico'),
+    path('admin/tecnicos/adicionar', AdicionarTecnico.as_view(), name='adicionar_tecnico'),
+    path('admin/tecnicos/editar/<int:pk>', EditarTecnico.as_view(), name='editar_tecnico'),
+    path('admin/tecnicos/ver/<int:pk>', VerTecnico.as_view(), name='ver_tecnico'),
+    path('admin/tecnicos/remover/<int:pk>', RemoverTecnico.as_view(), name='remover_tecnico'),
+    path('admin/tecnicos/reativar/<int:pk>', ReativarTecnico.as_view(), name='reativar_tecnico'),
     path('admin/', IndexAdmin.as_view(), name='index_admin'),
     path('cliente/', IndexCliente.as_view(), name='index_cliente'),
     path('cliente/chamados', IndexChamados.as_view(), name='index_chamado'),

@@ -5,7 +5,8 @@ from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic import ListView, DeleteView, DetailView, TemplateView
 
-from ..forms import AdicionarClienteForm, AdicionarTerminalForm, ReativarClienteForm, ReativarTerminalForm
+from ..forms import (AdicionarClienteForm, AdicionarTecnicoForm, AdicionarTerminalForm, ReativarClienteForm,
+                     ReativarTerminalForm, ReativarTecnicoForm)
 from ..models import Usuario, Terminal
 
 
@@ -148,6 +149,84 @@ class ReativarTerminal(PermissionRequiredMixin, UpdateView):
     login_url = 'autenticar_usuario'
     form_class = ReativarTerminalForm
     permission_required = 'chamados.delete_terminal'
+
+    def form_valid(self, form) -> HttpResponse:
+        self.object.is_active = True
+        return super().form_valid(form)
+
+
+class AdicionarTecnico(PermissionRequiredMixin, CreateView):
+    template_name = 'admin/tecnicos/adicionar.html'
+    model = Usuario
+    form_class = AdicionarTecnicoForm
+    success_url = reverse_lazy('admin_index_tecnico')
+    login_url = 'autenticar_usuario'
+    permission_required = 'chamados.add_usuario'
+
+    def form_valid(self, form) -> HttpResponse:
+        usuario = form.save()
+        usuario.tipo_usuario = 1  # tipo de usuário é Técnico
+        usuario.set_password(Usuario.objects.make_random_password())  # gera uma senha aleatória inicial
+        permissoes = [
+            Permission.objects.get(codename='view_chamado'),
+            Permission.objects.get(codename='change_chamado')
+        ]
+        usuario.user_permissions.set(permissoes)
+        return super().form_valid(form)
+
+
+class IndexTecnicos(PermissionRequiredMixin, ListView):
+    model = Usuario
+    template_name = 'admin/tecnicos/index.html'
+    context_object_name = 'tecnicos'
+    login_url = 'autenticar_usuario'
+    permission_required = 'chamados.view_usuario'
+
+
+class EditarTecnico(PermissionRequiredMixin, UpdateView):
+    template_name = 'admin/tecnicos/editar.html'
+    model = Usuario
+    form_class = AdicionarTecnicoForm
+    success_url = reverse_lazy('admin_index_tecnico')
+    login_url = 'autenticar_usuario'
+    permission_required = 'chamados.change_usuario'
+
+
+class VerTecnico(PermissionRequiredMixin, DetailView):
+    model = Usuario
+    template_name = 'admin/tecnicos/ver.html'
+    context_object_name = 'usuario'
+    login_url = 'autenticar_usuario'
+    permission_required = 'chamados.view_usuario'
+
+
+class RemoverTecnico(PermissionRequiredMixin, DeleteView):
+    model = Usuario
+    template_name = 'admin/tecnicos/remover.html'
+    success_url = reverse_lazy('admin_index_tecnico')
+    login_url = 'autenticar_usuario'
+    permission_required = 'chamados.delete_usuario'
+
+    def delete(self, request, *args, **kwargs) -> HttpResponseRedirect:
+        """
+        Exclui os usuários de forma não definitiva (apenas altera o atributo is_active).
+        """
+        self.object = self.get_object()
+        self.object.is_active = False
+        self.object.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def post(self, request, *args, **kwargs) -> HttpResponseRedirect:
+        return self.delete(request, *args, **kwargs)
+
+
+class ReativarTecnico(PermissionRequiredMixin, UpdateView):
+    model = Usuario
+    template_name = 'admin/tecnicos/reativar.html'
+    success_url = reverse_lazy('admin_index_tecnico')
+    login_url = 'autenticar_usuario'
+    form_class = ReativarTecnicoForm
+    permission_required = 'chamados.delete_usuario'
 
     def form_valid(self, form) -> HttpResponse:
         self.object.is_active = True

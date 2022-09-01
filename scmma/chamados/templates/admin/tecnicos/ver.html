@@ -1,0 +1,23 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}
+    SCMMA - Área do Administrador - Ver Técnico
+{% endblock %}
+
+{% block content %}
+<div class="card col-lg-8 offset-lg-2 col-md-12 mt-5">
+    <div class="card-title">
+        <h3>Técnico {{ usuario.get_full_name }}</h3>
+    </div>
+    <div class="card-body">
+        <table class="table table-hover">
+            {% for campo, valor in usuario.get_fields_tecnico %}
+            <tr>
+                <td>{{ campo }}</td>
+                <td>{{ valor|default_if_none:'' }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}
