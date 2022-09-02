@@ -1,5 +1,9 @@
+from decimal import Decimal
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from typing import Union
+
+from .utilitarios import converter_endereco_geolocalizacao
 
 
 class GerenciadorUsuario(BaseUserManager):
@@ -55,7 +59,8 @@ class Usuario(AbstractUser):
     _tipo_usuario = models.PositiveSmallIntegerField('Tipo de usuário', choices=TIPOS_USUARIOS, default=0,
                                                      db_column='tipo_usuario')
     nivel = models.PositiveSmallIntegerField('Nível', choices=OPCOES_NIVEIS, null=True)
-    ultima_localizacao = models.CharField('Última localização', max_length=200, null=True, blank=True)
+    ultima_latitude = models.CharField('Última latitude', max_length=50, null=True, blank=True)
+    ultima_longitude = models.CharField('Última longitude', max_length=50, null=True, blank=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
     objects = GerenciadorUsuario()
@@ -75,6 +80,13 @@ class Usuario(AbstractUser):
     @tipo_usuario.setter
     def tipo_usuario(self, valor):
         self._tipo_usuario = valor
+
+    @property
+    def geolocalizacao(self):
+        try:
+            return (Decimal(self.ultima_latitude), Decimal(self.ultima_longitude))
+        except Exception:
+            return None
 
     def tecnico_ocupado(self):
         # verifica se o técnico tem algum chamado com o estado "Em atendimento"
@@ -116,6 +128,7 @@ class Terminal(models.Model):
         ('SE', 'Sergipe'),
         ('TO', 'Tocantins'),
     )
+    CAMPOS_ENDERECO = ('rua', 'numero', 'bairro', 'cep', 'cidade', 'estado', )
     numero_serie = models.CharField('Número de série', max_length=50, unique=True)
     data_instalacao = models.DateField('Data de instalação', null=True, blank=True)
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, verbose_name='Cliente', null=True, blank=True)
@@ -127,6 +140,14 @@ class Terminal(models.Model):
     cidade = models.CharField('Cidade', max_length=100, null=True, blank=True)
     estado = models.CharField('Estado', max_length=2, choices=ESTADOS_FEDERACAO, null=True, blank=True)
     is_active = models.BooleanField(default=True)
+
+    @property
+    def geolocalizacao(self) -> Union[tuple, None]:
+        endereco = ' '.join([getattr(self, campo) for campo in self.CAMPOS_ENDERECO if getattr(self, campo)])
+        try:
+            return converter_endereco_geolocalizacao(endereco)
+        except Exception:
+            return None
 
     def get_fields(self) -> str:
         return [(field.verbose_name, field.value_from_object(self))

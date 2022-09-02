@@ -1,19 +1,16 @@
-import urllib
-import requests
+from decimal import Decimal
+from geopy.distance import distance
+from geopy.geocoders import Nominatim
 
 
-def converter_endereco_coordenadas(endereco: str) -> tuple:
-    url = 'https://nominatim.openstreetmap.org/search/' + urllib.parse.quote(endereco) + '?format=json'
-    resposta = requests.get(url)
-    if resposta.status_code == 200:
-        resultado = resposta.json()
-        longitude = resultado[0]['lon']
-        latitude = resultado[0]['lat']
-        return (longitude, latitude)
-    raise Exception(f'Erro ao consultar o endereço {endereco}')
+def calcular_distancia_pontos(inicial: tuple, final: tuple) -> float:
+    distancia = distance(inicial, final)
+    return Decimal(str(distancia.km))
 
 
-if __name__ == '__main__':
-    endereco = 'Praça da Sé'
-    longitude, latitude = converter_endereco_coordenadas(endereco)
-    print(longitude, latitude)
+def converter_endereco_geolocalizacao(endereco: str) -> tuple:
+    geolocalizador = Nominatim(user_agent='scmma')
+    geolocalizacao = geolocalizador.geocode(endereco)
+    latitude = Decimal(str(geolocalizacao.latitude))
+    longitude = Decimal(str(geolocalizacao.longitude))
+    return (latitude, longitude)
