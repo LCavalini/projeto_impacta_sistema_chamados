@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from typing import Union
 
-from .utilitarios import converter_endereco_geolocalizacao
+from .utilitarios import converter_endereco_geolocalizacao, calcular_distancia_pontos
 
 
 class GerenciadorUsuario(BaseUserManager):
@@ -61,6 +61,7 @@ class Usuario(AbstractUser):
     nivel = models.PositiveSmallIntegerField('Nível', choices=OPCOES_NIVEIS, null=True)
     ultima_latitude = models.CharField('Última latitude', max_length=50, null=True, blank=True)
     ultima_longitude = models.CharField('Última longitude', max_length=50, null=True, blank=True)
+    tecnico_ocupado = models.BooleanField('Tecnico disponível?', default=False)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
     objects = GerenciadorUsuario()
@@ -87,10 +88,6 @@ class Usuario(AbstractUser):
             return (Decimal(self.ultima_latitude), Decimal(self.ultima_longitude))
         except Exception:
             return None
-
-    def tecnico_ocupado(self):
-        # verifica se o técnico tem algum chamado com o estado "Em atendimento"
-        return Atendimento.objects.filter(chamado__estado=2, tecnico=self.pk, transferido=False).exists()
 
     def __str__(self) -> str:
         return self.get_full_name()
@@ -140,14 +137,21 @@ class Terminal(models.Model):
     cidade = models.CharField('Cidade', max_length=100, null=True, blank=True)
     estado = models.CharField('Estado', max_length=2, choices=ESTADOS_FEDERACAO, null=True, blank=True)
     is_active = models.BooleanField(default=True)
+    latitude = models.CharField('Latitude', max_length=50, null=True, blank=True)
+    longitude = models.CharField('Longitude', max_length=50, null=True, blank=True)
 
     @property
     def geolocalizacao(self) -> Union[tuple, None]:
-        endereco = ' '.join([getattr(self, campo) for campo in self.CAMPOS_ENDERECO if getattr(self, campo)])
         try:
-            return converter_endereco_geolocalizacao(endereco)
+            return (Decimal(self.ultima_latitude), Decimal(self.ultima_longitude))
         except Exception:
             return None
+
+    def configurar_geolocalizacao(self):
+        endereco = ' '.join([getattr(self, campo) for campo in self.CAMPOS_ENDERECO if getattr(self, campo)])
+        geolocalizacao = converter_endereco_geolocalizacao(endereco)
+        if geolocalizacao:
+            self.latitude, self.longitude = geolocalizacao
 
     def get_fields(self) -> str:
         return [(field.verbose_name, field.value_from_object(self))
@@ -189,8 +193,15 @@ class Chamado(models.Model):
 
 
 class Atendimento(models.Model):
-    tecnico = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    tecnico = models.ForeignKey(Usuario, on_delete=models.CASCADE, null=True, blank=True)
     chamado = models.ForeignKey(Chamado, on_delete=models.CASCADE)
     atividades = models.TextField('Atividades relizadas', null=True, blank=True)
     transferido = models.BooleanField('Atendimento transferido', default=False)
     motivo_transferencia = models.TextField('Motivo da transferencia', null=True, blank=True)
+
+    def alocar_tecnico(self):
+        tecnicos = Usuario.objects.filter(_tipo_usuario=1)
+        tecnicos_situacao = [(tecnico, tecnico.tecnico_ocupado, calcular_distancia_pontos(tecnico.geolocalizacao,
+                              self.chamado.terminal.geolocalizacao)) for tecnico in tecnicos]
+        tecnicos_ordenados = sorted(tecnicos_situacao, key=lambda x: (x[1], x[2]))
+        self.tecnico = tecnicos_ordenados[0][0]
