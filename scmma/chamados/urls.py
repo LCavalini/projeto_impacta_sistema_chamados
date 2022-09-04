@@ -2,7 +2,8 @@ from django.urls import path
 
 from .views.generico import (AutenticarUsuario, DesautenticarUsuario, Index, RedefinirSenha, RedefinirSenhaCompleta,
                              RedefinirSenhaConfirmar, RedefinirSenhaEnviado)
-from .views.cliente import AdicionarChamado, IndexChamados, IndexCliente
+from .views.cliente import AdicionarChamado, IndexChamados as IndexClienteChamados, IndexCliente
+from .views.tecnico import IndexChamados as IndexTecnicoChamados, IndexTecnico, AtualizarLocalizacao
 from .views.admin import (AdicionarTecnico, AdicionarTerminal, EditarTerminal, IndexAdmin, IndexClientes,
                           AdicionarCliente, EditarCliente, IndexTecnicos, IndexTerminal, ReativarCliente,
                           ReativarTecnico, ReativarTerminal, RemoverCliente, RemoverTecnico, EditarTecnico,
@@ -29,8 +30,11 @@ urlpatterns = [
     path('admin/tecnicos/reativar/<int:pk>', ReativarTecnico.as_view(), name='reativar_tecnico'),
     path('admin/', IndexAdmin.as_view(), name='index_admin'),
     path('cliente/', IndexCliente.as_view(), name='index_cliente'),
-    path('cliente/chamados', IndexChamados.as_view(), name='index_chamado'),
+    path('cliente/chamados', IndexClienteChamados.as_view(), name='index_cliente_chamado'),
     path('cliente/chamados/adicionar', AdicionarChamado.as_view(), name='adicionar_chamado'),
+    path('tecnico/', IndexTecnico.as_view(), name='index_tecnico'),
+    path('tecnico/chamados', IndexTecnicoChamados.as_view(), name='index_tecnico_chamado'),
+    path('tecnico/localizacao/atualizar', AtualizarLocalizacao.as_view(), name='atualizar_localizacao'),
     path('login/', AutenticarUsuario.as_view(), name='autenticar_usuario'),
     path('logout/', DesautenticarUsuario.as_view(), name='desautenticar_usuario'),
     path('redefinir/', RedefinirSenha.as_view(), name='redefinir_senha'),

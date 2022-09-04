@@ -12,7 +12,7 @@ class AdicionarChamado(PermissionRequiredMixin, CreateView):
     model = Chamado
     form_class = AdicionarChamadoForm
     template_name = 'cliente/chamados/adicionar.html'
-    success_url = reverse_lazy('index_chamado')
+    success_url = reverse_lazy('index_cliente_chamado')
     login_url = 'autenticar_usuario'
     permission_required = 'chamados.add_chamado'
 
@@ -48,6 +48,10 @@ class IndexChamados(PermissionRequiredMixin, ListView):
     context_object_name = 'chamados'
     login_url = 'autenticar_usuario'
     permission_required = 'chamados.view_chamado'
+
+    # Mostra apenas os chamados do usuário autenticado
+    def get_queryset(self, *args, **kwargs):
+        return super().get_queryset(*args, **kwargs).filter(usuario=self.request.user)
 
 
 class IndexCliente(PermissionRequiredMixin, TemplateView):

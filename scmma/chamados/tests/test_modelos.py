@@ -59,17 +59,17 @@ class TestModelos(TestCase):
         chamado = Chamado(tipo=0, descricao='A máquina não inicializa', gravidade=1, usuario=cliente,
                           terminal=terminal)
         chamado.save()
-        tecnico1 = Usuario(email='msilva@gmail.com')
+        tecnico1 = Usuario(email='msilva@gmail.com', nivel=0)
         tecnico1.tipo_usuario = 1
         # Localização: Faculdade Impacta
         tecnico1.ultima_latitude, tecnico1.ultima_longitude = '-23.5255246', '-46.6517839'
         tecnico1.save()
-        tecnico2 = Usuario(email='msantos@gmail.com')
+        tecnico2 = Usuario(email='msantos@gmail.com', nivel=0)
         tecnico2.tipo_usuario = 1
         # Localização: Estádio do Morumbi
         tecnico2.ultima_latitude, tecnico2.ultima_longitude = '-23.6000839', '-46.7222789'
         tecnico2.save()
-        tecnico3 = Usuario(email='cprado@gmail.com')
+        tecnico3 = Usuario(email='cprado@gmail.com', nivel=0)
         tecnico3.tipo_usuario = 1
         # Localização: Vale do Anhangabaú
         tecnico3.ultima_latitude, tecnico3.ultima_longitude = '-23.5450214', '-46.6386695'

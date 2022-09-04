@@ -74,17 +74,21 @@ class AdicionarChamadoForm(ModelForm):
 
     def __init__(self, *args, **kwargs) -> None:
         self.usuario = kwargs.pop('usuario', None)
+        # se for criado pelo POST (com dados do formulário)
+        if kwargs:
+            dados = {campo: kwargs['data'][campo] for campo in self._meta.fields}
+            # o terminal deve receber o objeto do banco de dados
+            dados['terminal'] = Terminal.objects.get(pk=dados['terminal'])
+            dados['usuario'] = self.usuario
+            # usa a função do Gerenciador de Chamado, em vez do método construtor
+            instance = Chamado.objects.create_chamado(**dados)
+            kwargs.update({'instance': instance})
         super().__init__(*args, **kwargs)
         # limita as opções de terminais àqueles que são relacionados ao usuário autenticado
         if self.usuario is not None:
             self.fields['terminal'].queryset = Terminal.objects.filter(usuario=self.usuario.pk)
         else:
             self.fields['terminal'].queryset = Terminal.objects.none()
-
-    def save(self, commit: bool = True):
-        # atribui o chamado ao usuário autenticado
-        self.instance.usuario = self.usuario
-        return super().save(commit)
 
 
 class RedefinirSenhaForm(PasswordResetForm):

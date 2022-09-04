@@ -32,7 +32,7 @@ class TestCadastramentoChamados(TestCase):
         caminho = reverse_lazy('adicionar_chamado')
         resposta = self.cliente_web.post(caminho, data=dados, format=dict)
         resultado = resposta
-        esperado = reverse_lazy('index_chamado')
+        esperado = reverse_lazy('index_cliente_chamado')
         self.assertRedirects(resultado, esperado)  # teste da requisição
         chamado = Chamado.objects.get(tipo=dados['tipo'])
         resultado = chamado.descricao

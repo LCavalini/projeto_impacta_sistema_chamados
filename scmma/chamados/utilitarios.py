@@ -2,9 +2,14 @@ from decimal import Decimal
 from geopy.distance import distance
 from geopy.geocoders import Nominatim
 
+from .exceptions import CalculoDistanciaException
+
 
 def calcular_distancia_pontos(inicial: tuple, final: tuple) -> float:
-    distancia = distance(inicial, final)
+    try:
+        distancia = distance(inicial, final)
+    except Exception:
+        raise CalculoDistanciaException()
     return Decimal(str(distancia.km))
 
 

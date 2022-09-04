@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from typing import Union
 
+from .exceptions import SemTecnicosDisponiveisException
 from .utilitarios import converter_endereco_geolocalizacao, calcular_distancia_pontos
 
 
@@ -33,6 +34,27 @@ class GerenciadorUsuario(BaseUserManager):
         usuario.last_name = 'Geral'
         usuario.save(using=self._db)
         return usuario
+
+
+class GerenciadorChamado(models.Manager):
+
+    def create_chamado(self, **kwargs):
+        chamado = self.create(**kwargs)
+        try:
+            atendimento = Atendimento.objects.create_atendimento(chamado=chamado)
+            atendimento.save()
+            chamado.estado = 1  # se o atendimento for criado, o chamado muda o estado para 'Alocado'
+        except Exception as e:
+            raise e
+        return chamado
+
+
+class GerenciadorAtendimento(models.Manager):
+
+    def create_atendimento(self, nivel: int = 0, **kwargs):
+        atendimento = self.create(**kwargs)
+        atendimento.alocar_tecnico(nivel=nivel)
+        return atendimento
 
 
 class Usuario(AbstractUser):
@@ -186,6 +208,7 @@ class Chamado(models.Model):
     gravidade = models.PositiveSmallIntegerField('Gravidade', choices=NIVEIS_GRAVIDADE)
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     terminal = models.ForeignKey(Terminal, on_delete=models.CASCADE)
+    objects = GerenciadorChamado()
 
     @property
     def opcao_estado(self) -> str:
@@ -198,9 +221,12 @@ class Atendimento(models.Model):
     atividades = models.TextField('Atividades relizadas', null=True, blank=True)
     transferido = models.BooleanField('Atendimento transferido', default=False)
     motivo_transferencia = models.TextField('Motivo da transferencia', null=True, blank=True)
+    objects = GerenciadorAtendimento()
 
-    def alocar_tecnico(self):
-        tecnicos = Usuario.objects.filter(_tipo_usuario=1)
+    def alocar_tecnico(self, nivel: int = 0):
+        tecnicos = Usuario.objects.filter(_tipo_usuario=1, nivel=nivel)
+        if tecnicos.count() < 1:
+            raise SemTecnicosDisponiveisException()
         tecnicos_situacao = [(tecnico, tecnico.tecnico_ocupado, calcular_distancia_pontos(tecnico.geolocalizacao,
                               self.chamado.terminal.geolocalizacao)) for tecnico in tecnicos]
         tecnicos_ordenados = sorted(tecnicos_situacao, key=lambda x: (x[1], x[2]))

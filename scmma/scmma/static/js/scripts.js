@@ -5,4 +5,19 @@ $(document).ready( function() {
     $("#id_cnpj").mask("00.000.000/0000-00");
     $("#id_telefone").mask("(00) 00000-0000");
     $("#id_cep").mask("00000-000")
-});     
+}); 
+
+function atualizarLocalizacao() {
+
+    navigator.geolocation.getCurrentPosition(function(position) {
+        $.ajax({
+            url: "/tecnico/localizacao/atualizar",
+            data: {
+                "latitude": position.coords.latitude,
+                "longitude": position.coords.longitude,
+                "csrfmiddlewaretoken": window.CSRF_TOKEN
+            },
+            method: "POST"
+        })
+    })
+}
