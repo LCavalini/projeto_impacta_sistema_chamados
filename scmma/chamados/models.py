@@ -175,7 +175,7 @@ class Terminal(models.Model):
         if geolocalizacao:
             self.latitude, self.longitude = geolocalizacao
 
-    def get_fields(self) -> str:
+    def get_fields(self) -> list:
         return [(field.verbose_name, field.value_from_object(self))
                 for field in self.__class__._meta.fields if field.name in self.CAMPOS_TERMINAL]
 
@@ -187,7 +187,7 @@ class Chamado(models.Model):
     ESTADOS = (
         (0, 'Aberto'),
         (1, 'Alocado'),
-        (2, 'Em antendimento'),
+        (2, 'Em atendimento'),
         (3, 'Transferido'),
         (4, 'Encerrado'),
     )
@@ -206,19 +206,29 @@ class Chamado(models.Model):
     descricao = models.TextField('Descrição')
     estado = models.PositiveSmallIntegerField('Estado', choices=ESTADOS, default=0)
     gravidade = models.PositiveSmallIntegerField('Gravidade', choices=NIVEIS_GRAVIDADE)
-    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
-    terminal = models.ForeignKey(Terminal, on_delete=models.CASCADE)
+    usuario = models.ForeignKey(Usuario, verbose_name='Cliente', on_delete=models.CASCADE)
+    terminal = models.ForeignKey(Terminal, verbose_name='Terminal', on_delete=models.CASCADE)
     objects = GerenciadorChamado()
 
     @property
     def opcao_estado(self) -> str:
         return [item[1] for item in self.ESTADOS if item[0] == self.estado][0]
 
+    def get_fields(self) -> list:
+        return [
+            ('Tipo', dict(self.TIPOS_CHAMADO)[self.tipo]),
+            ('Descrição', self.descricao),
+            ('Estado', dict(self.ESTADOS)[self.estado]),
+            ('Gravidade', dict(self.NIVEIS_GRAVIDADE)[self.gravidade]),
+            ('Cliente', self.usuario),
+            ('Terminal', self.terminal),
+        ]
+
 
 class Atendimento(models.Model):
     tecnico = models.ForeignKey(Usuario, on_delete=models.CASCADE, null=True, blank=True)
     chamado = models.ForeignKey(Chamado, on_delete=models.CASCADE)
-    atividades = models.TextField('Atividades relizadas', null=True, blank=True)
+    atividades = models.TextField('Atividades realizadas', null=True)
     transferido = models.BooleanField('Atendimento transferido', default=False)
     motivo_transferencia = models.TextField('Motivo da transferencia', null=True, blank=True)
     objects = GerenciadorAtendimento()
@@ -231,3 +241,11 @@ class Atendimento(models.Model):
                               self.chamado.terminal.geolocalizacao)) for tecnico in tecnicos]
         tecnicos_ordenados = sorted(tecnicos_situacao, key=lambda x: (x[1], x[2]))
         self.tecnico = tecnicos_ordenados[0][0]
+
+    def get_fields(self) -> list:
+        return [
+            ('Técnico', self.tecnico),
+            ('Atividades', self.atividades),
+            ('Transferido?', 'Sim' if self.transferido else 'Não'),
+            ('Motivo da transferência', self.motivo_transferencia),
+        ]

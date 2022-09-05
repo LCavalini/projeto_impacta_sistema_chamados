@@ -5,7 +5,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.forms import ModelForm
 
-from .models import Chamado, Terminal, Usuario
+from .models import Chamado, Terminal, Usuario, Atendimento
 
 UserModel = get_user_model()
 
@@ -89,6 +89,15 @@ class AdicionarChamadoForm(ModelForm):
             self.fields['terminal'].queryset = Terminal.objects.filter(usuario=self.usuario.pk)
         else:
             self.fields['terminal'].queryset = Terminal.objects.none()
+
+
+class EncerrarChamadoForm(ModelForm):
+
+    required_css_class = 'campo_obrigatorio'
+
+    class Meta:
+        model = Atendimento
+        fields = ['atividades']
 
 
 class RedefinirSenhaForm(PasswordResetForm):

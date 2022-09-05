@@ -3,7 +3,8 @@ from django.urls import path
 from .views.generico import (AutenticarUsuario, DesautenticarUsuario, Index, RedefinirSenha, RedefinirSenhaCompleta,
                              RedefinirSenhaConfirmar, RedefinirSenhaEnviado)
 from .views.cliente import AdicionarChamado, IndexChamados as IndexClienteChamados, IndexCliente
-from .views.tecnico import IndexChamados as IndexTecnicoChamados, IndexTecnico, AtualizarLocalizacao
+from .views.tecnico import (AtenderChamado, AtualizarDisponibilidade, EncerrarChamado, HistoricoChamado,
+                            IndexChamados as IndexTecnicoChamados, IndexTecnico, AtualizarLocalizacao, VerChamado)
 from .views.admin import (AdicionarTecnico, AdicionarTerminal, EditarTerminal, IndexAdmin, IndexClientes,
                           AdicionarCliente, EditarCliente, IndexTecnicos, IndexTerminal, ReativarCliente,
                           ReativarTecnico, ReativarTerminal, RemoverCliente, RemoverTecnico, EditarTecnico,
@@ -34,7 +35,12 @@ urlpatterns = [
     path('cliente/chamados/adicionar', AdicionarChamado.as_view(), name='adicionar_chamado'),
     path('tecnico/', IndexTecnico.as_view(), name='index_tecnico'),
     path('tecnico/chamados', IndexTecnicoChamados.as_view(), name='index_tecnico_chamado'),
+    path('tecnico/chamados/ver/<int:pk>', VerChamado.as_view(), name='ver_chamado'),
+    path('tecnico/chamados/historico/<int:pk>', HistoricoChamado.as_view(), name='historico_chamado'),
+    path('tecnico/chamados/atender/<int:pk>', AtenderChamado.as_view(), name='atender_chamado'),
+    path('tecnico/chamados/encerrar/<int:pk>', EncerrarChamado.as_view(), name='encerrar_chamado'),
     path('tecnico/localizacao/atualizar', AtualizarLocalizacao.as_view(), name='atualizar_localizacao'),
+    path('tecnico/disponibilidade/atualizar', AtualizarDisponibilidade.as_view(), name='atualizar_disponibilidade'),
     path('login/', AutenticarUsuario.as_view(), name='autenticar_usuario'),
     path('logout/', DesautenticarUsuario.as_view(), name='desautenticar_usuario'),
     path('redefinir/', RedefinirSenha.as_view(), name='redefinir_senha'),
