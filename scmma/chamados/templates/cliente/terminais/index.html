@@ -23,7 +23,7 @@
                 {% for terminal in terminais %}
                 <tr>
                     <td>{{ terminal.numero_serie }}</td>
-                    <td>{{ chamado.data_instalacao|default_if_none:'' }}</td>
+                    <td>{{ terminal.data_instalacao|default_if_none:'' }}</td>
                     <td>
                         <a class="btn btn-primary btn-sm" href="{% url 'cliente_ver_terminal' terminal.pk %}">
                             <i class="fa-solid fa-eye"></i>
