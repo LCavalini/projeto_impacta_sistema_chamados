@@ -15,6 +15,7 @@
         <table class="table table-borderless my-2">
             <thead>
                 <tr>
+                    <th>Protocolo</th>
                     <th>Terminal</th>
                     <th>Estado</th>
                 </tr>
@@ -22,8 +23,17 @@
             <tbody>
                 {% for chamado in chamados %}
                 <tr>
+                    <td>{{ chamado.protocolo|default_if_none:'' }}</td>
                     <td>{{ chamado.terminal|default_if_none:'' }}</td>
                     <td>{{ chamado.opcao_estado }}</td>
+                    <td>
+                        <a class="btn btn-primary btn-sm" href="{% url 'cliente_ver_chamado' chamado.pk %}">
+                            <i class="fa-solid fa-eye"></i>
+                        </a>
+                        <a class="btn btn-primary btn-sm" href="{% url 'cliente_historico_chamado' chamado.pk %}">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </a>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

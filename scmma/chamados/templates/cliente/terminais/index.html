@@ -1,0 +1,38 @@
+{% extends 'cliente/base.html' %}
+
+{% block title %}
+    SCMMA - Área do Cliente - Terminais
+{% endblock %}
+
+
+{% block content %}
+<div class="card col-lg-12 mt-5">
+    <div class="card-title">
+        <h3 class="titulo-pagina m-2">Terminais</h3>
+    </div>
+    <div class="card-body">
+        <table class="table table-borderless my-2">
+            <thead>
+                <tr>
+                    <th>Número de série</th>
+                    <th>Data de instalação</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for terminal in terminais %}
+                <tr>
+                    <td>{{ terminal.numero_serie }}</td>
+                    <td>{{ chamado.data_instalacao|default_if_none:'' }}</td>
+                    <td>
+                        <a class="btn btn-primary btn-sm" href="{% url 'cliente_ver_terminal' terminal.pk %}">
+                            <i class="fa-solid fa-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

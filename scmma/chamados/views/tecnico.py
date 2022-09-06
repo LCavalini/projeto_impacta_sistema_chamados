@@ -1,9 +1,12 @@
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib import messages
+from django.db import transaction
 from django.shortcuts import HttpResponse, HttpResponseRedirect, render
 from django.views.generic import ListView, TemplateView, View, DetailView
 from django.urls import reverse_lazy
 
-from ..forms import EncerrarChamadoForm
+from ..exceptions import SemTecnicosDisponiveisException
+from ..forms import EncerrarChamadoForm, TransferirChamadoForm
 from ..models import Chamado, Usuario, Atendimento
 
 
@@ -74,8 +77,42 @@ class EncerrarChamado(PermissionRequiredMixin, View):
         atendimento = Atendimento.objects.filter(chamado=chamado, tecnico=self.request.user.pk).last()
         atendimento.atividades = self.request.POST['atividades']
         atendimento.save()
-        chamado.estado = 4
+        chamado.estado = 3
         chamado.save()
+        return HttpResponseRedirect(self.success_url)
+
+
+class TransferirChamado(PermissionRequiredMixin, View):
+    template_name = 'tecnico/chamados/transferir.html'
+    login_url = 'autenticar_usuario'
+    permission_required = 'chamados.change_chamado'
+    success_url = reverse_lazy('index_tecnico_chamado')
+    form_class = TransferirChamadoForm
+
+    def get(self, request, *args, **kwargs) -> HttpResponse:
+        chamado = Chamado.objects.get(pk=self.kwargs['pk'])
+        form = self.form_class(nivel_tecnico=self.request.user.nivel)
+        return render(request, template_name=self.template_name, context={'form': form, 'chamado': chamado})
+
+    def post(self, request, *args, **kwargs) -> HttpResponseRedirect:
+        try:
+            with transaction.atomic():
+                tecnico = self.request.user
+                tipo_transferencia = self.request.POST['tipo_transferencia']
+                chamado = Chamado.objects.get(pk=self.kwargs['pk'])
+                atendimento_encerrado = Atendimento.objects.filter(chamado=chamado, tecnico=self.request.user.pk).last()
+                atendimento_encerrado.atividades = self.request.POST['atividades']
+                atendimento_encerrado.transferido = True
+                atendimento_encerrado.motivo_transferencia = self.request.POST['motivo_transferencia']
+                atendimento_encerrado.save()
+                novo_nivel = tecnico.nivel + 1 if tipo_transferencia == 'nivel_superior' else tecnico.nivel
+                novo_atendimento = Atendimento.objects.create_atendimento(nivel=novo_nivel, ignorar_tecnicos=[tecnico],
+                                                                          chamado=chamado)
+                novo_atendimento.save()
+                chamado.estado = 1  # chamado alocado
+                chamado.save()
+        except SemTecnicosDisponiveisException as e:
+            messages.add_message(request, level=messages.ERROR, message=f'Erro ao transferir o chamado: {str(e)}')
         return HttpResponseRedirect(self.success_url)
 
 

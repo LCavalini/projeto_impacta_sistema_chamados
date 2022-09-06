@@ -1,8 +1,9 @@
 from decimal import Decimal
 from django.contrib.auth.models import AbstractUser, BaseUserManager
-from django.db import models
+from django.db import models, transaction
 from typing import Union
 
+from datetime import datetime
 from .exceptions import SemTecnicosDisponiveisException
 from .utilitarios import converter_endereco_geolocalizacao, calcular_distancia_pontos
 
@@ -41,9 +42,21 @@ class GerenciadorChamado(models.Manager):
     def create_chamado(self, **kwargs):
         chamado = self.create(**kwargs)
         try:
-            atendimento = Atendimento.objects.create_atendimento(chamado=chamado)
-            atendimento.save()
-            chamado.estado = 1  # se o atendimento for criado, o chamado muda o estado para 'Alocado'
+            with transaction.atomic():
+                atendimento = Atendimento.objects.create_atendimento(chamado=chamado)
+                atendimento.save()
+                chamado.estado = 1  # se o atendimento for criado, o chamado muda o estado para 'Alocado'
+                # o padrão de protocolo é AAAAMMDDXXXXXX, sendo XXXXXX uma sequência crescente de protocolos do dia
+                agora = datetime.now()
+                ano, mes, dia = agora.year, agora.month, agora.day
+                prefixo_protocolo = f'{ano:04d}{mes:02d}{dia:02d}'
+                ultimo_chamado_hoje = Chamado.objects.filter(protocolo__startswith=prefixo_protocolo).last()
+                if not ultimo_chamado_hoje:
+                    sufixo_protocolo = f'{1:06d}'
+                else:
+                    ultimo_numero = int(ultimo_chamado_hoje.protocolo.replace(prefixo_protocolo, ''))
+                    sufixo_protocolo = f'{ultimo_numero + 1:06d}'
+                chamado.protocolo = f'{prefixo_protocolo}{sufixo_protocolo}'
         except Exception as e:
             raise e
         return chamado
@@ -51,9 +64,9 @@ class GerenciadorChamado(models.Manager):
 
 class GerenciadorAtendimento(models.Manager):
 
-    def create_atendimento(self, nivel: int = 0, **kwargs):
+    def create_atendimento(self, nivel: int = 0, ignorar_tecnicos: list = [], **kwargs):
         atendimento = self.create(**kwargs)
-        atendimento.alocar_tecnico(nivel=nivel)
+        atendimento.alocar_tecnico(nivel=nivel, ignorar_tecnicos=ignorar_tecnicos)
         return atendimento
 
 
@@ -188,8 +201,7 @@ class Chamado(models.Model):
         (0, 'Aberto'),
         (1, 'Alocado'),
         (2, 'Em atendimento'),
-        (3, 'Transferido'),
-        (4, 'Encerrado'),
+        (3, 'Encerrado'),
     )
     NIVEIS_GRAVIDADE = (
         (0, 'Baixa'),
@@ -202,6 +214,7 @@ class Chamado(models.Model):
         ('erro_pagamento', 'Erro ao efetuar o pagamento'),
         ('outros', 'Outros')
     )
+    protocolo = models.CharField('Protocolo', max_length=14)
     tipo = models.CharField('Tipo', choices=TIPOS_CHAMADO, max_length=100)
     descricao = models.TextField('Descrição')
     estado = models.PositiveSmallIntegerField('Estado', choices=ESTADOS, default=0)
@@ -230,15 +243,16 @@ class Atendimento(models.Model):
     chamado = models.ForeignKey(Chamado, on_delete=models.CASCADE)
     atividades = models.TextField('Atividades realizadas', null=True)
     transferido = models.BooleanField('Atendimento transferido', default=False)
-    motivo_transferencia = models.TextField('Motivo da transferencia', null=True, blank=True)
+    motivo_transferencia = models.TextField('Motivo da transferencia', null=True)
     objects = GerenciadorAtendimento()
 
-    def alocar_tecnico(self, nivel: int = 0):
+    def alocar_tecnico(self, nivel: int = 0, ignorar_tecnicos: list = []):
         tecnicos = Usuario.objects.filter(_tipo_usuario=1, nivel=nivel)
-        if tecnicos.count() < 1:
-            raise SemTecnicosDisponiveisException()
         tecnicos_situacao = [(tecnico, tecnico.tecnico_ocupado, calcular_distancia_pontos(tecnico.geolocalizacao,
-                              self.chamado.terminal.geolocalizacao)) for tecnico in tecnicos]
+                              self.chamado.terminal.geolocalizacao))
+                             for tecnico in tecnicos if tecnico not in ignorar_tecnicos]
+        if len(tecnicos_situacao) < 1:
+            raise SemTecnicosDisponiveisException()
         tecnicos_ordenados = sorted(tecnicos_situacao, key=lambda x: (x[1], x[2]))
         self.tecnico = tecnicos_ordenados[0][0]
 

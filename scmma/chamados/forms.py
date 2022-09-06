@@ -100,6 +100,27 @@ class EncerrarChamadoForm(ModelForm):
         fields = ['atividades']
 
 
+class TransferirChamadoForm(ModelForm):
+
+    TIPOS_TRANSFERENCIA = (
+        ('nivel_superior', 'Escalar (técnico de nível superior)'),
+        ('mesmo_nivel', 'Repassar (técnico de mesmo nível)')
+    )
+    required_css_class = 'campo_obrigatorio'
+    tipo_transferencia = forms.ChoiceField(choices=TIPOS_TRANSFERENCIA, required=True)
+
+    class Meta:
+        model = Atendimento
+        fields = ['atividades', 'motivo_transferencia']
+
+    def __init__(self, *args, **kwargs) -> None:
+        nivel_tecnico = kwargs.pop('nivel_tecnico', 0)
+        super().__init__(*args, **kwargs)
+        # Se já está no último nível, não pode escalar
+        if nivel_tecnico >= 2:
+            self.fields['tipo_transferencia'].choices = [('mesmo_nivel', 'Repassar (técnico de mesmo nível)')]
+
+
 class RedefinirSenhaForm(PasswordResetForm):
     pass
 
