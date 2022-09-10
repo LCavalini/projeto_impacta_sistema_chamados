@@ -12,7 +12,7 @@
     <div class="card-body">
         <p>Tem certeza que deseja reativar o terminal abaixo?</p>
         <table class="table table-hover">
-            {% for campo, valor in terminal.get_fields %}
+            {% for campo, valor in terminal.campos %}
             <tr>
                 <td>{{ campo }}</td>
                 <td>{{ valor|default_if_none:'' }}</td>

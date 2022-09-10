@@ -1,10 +1,13 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.models import Permission
 from django.http import HttpResponseRedirect, HttpResponse
+from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic import ListView, DeleteView, DetailView, TemplateView
 
+from ..exceptions import ConfiguracaoGeolocalizacaoException
 from ..forms import (AdicionarClienteForm, AdicionarTecnicoForm, AdicionarTerminalForm, ReativarClienteForm,
                      ReativarTerminalForm, ReativarTecnicoForm)
 from ..models import Usuario, Terminal
@@ -96,6 +99,13 @@ class AdicionarTerminal(PermissionRequiredMixin, CreateView):
     login_url = 'autenticar_usuario'
     permission_required = 'chamados.add_terminal'
 
+    def post(self, request, *args, **kwargs) -> HttpResponse:
+        try:
+            return super().post(request, *args, **kwargs)
+        except ConfiguracaoGeolocalizacaoException as e:
+            messages.add_message(request, messages.ERROR, str(e))
+            return render(request, self.template_name, context={'form': self.get_form()})
+
 
 class IndexTerminal(PermissionRequiredMixin, ListView):
     model = Terminal
@@ -112,6 +122,13 @@ class EditarTerminal(PermissionRequiredMixin, UpdateView):
     success_url = reverse_lazy('admin_index_terminal')
     login_url = 'autenticar_usuario'
     permission_required = 'chamados.change_terminal'
+
+    def post(self, request, *args, **kwargs) -> HttpResponse:
+        try:
+            return super().post(request, *args, **kwargs)
+        except ConfiguracaoGeolocalizacaoException as e:
+            messages.add_message(request, messages.ERROR, str(e))
+            return render(request, self.template_name, context={'form': self.get_form()})
 
 
 class VerTerminal(PermissionRequiredMixin, DetailView):

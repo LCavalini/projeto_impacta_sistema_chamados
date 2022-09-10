@@ -1,5 +1,5 @@
-from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib import messages
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db import transaction
 from django.shortcuts import HttpResponse, HttpResponseRedirect, render
 from django.views.generic import ListView, TemplateView, View, DetailView
@@ -17,9 +17,10 @@ class IndexChamados(PermissionRequiredMixin, ListView):
     login_url = 'autenticar_usuario'
     permission_required = 'chamados.change_chamado'
 
-    # Mostra apenas os chamados do usuário autenticado
+    # Mostra apenas os chamados do usuário autenticado e que não foram transferidos
     def get_queryset(self, *args, **kwargs):
-        return super().get_queryset(*args, **kwargs).filter(atendimento__tecnico=self.request.user)
+        return super().get_queryset(*args, **kwargs).filter(atendimento__tecnico=self.request.user,
+                                                            atendimento__transferido=False)
 
 
 class VerChamado(PermissionRequiredMixin, DetailView):
@@ -55,7 +56,7 @@ class AtenderChamado(PermissionRequiredMixin, DetailView):
         chamado = Chamado.objects.get(pk=self.kwargs['pk'])
         chamado.estado = 2
         chamado.save()
-        self.request.user.tecnico_ocupado = True
+        self.request.user.tecnico_ocupado = True  # o técnico fica ocupado por padrão ao atender um chamado
         self.request.user.save()
         return HttpResponseRedirect(self.success_url)
 
@@ -79,6 +80,8 @@ class EncerrarChamado(PermissionRequiredMixin, View):
         atendimento.save()
         chamado.estado = 3
         chamado.save()
+        self.request.user.tecnico_ocupado = False  # o técnico fica não ocupado por padrão ao encerrar o chamado
+        self.request.user.save()
         return HttpResponseRedirect(self.success_url)
 
 
@@ -127,7 +130,11 @@ class AtualizarLocalizacao(PermissionRequiredMixin, View):
         tecnico.ultima_latitude = latitude
         tecnico.ultima_longitude = longitude
         tecnico.save()
-        return HttpResponseRedirect(request.META['HTTP_REFERER'])
+        if 'HTTP_REFERER' in request.META:
+            pagina_seguinte = request.META['HTTP_REFERER']
+        else:
+            pagina_seguinte = reverse_lazy('index_tecnico')
+        return HttpResponseRedirect(pagina_seguinte)
 
 
 class AtualizarDisponibilidade(PermissionRequiredMixin, View):
@@ -139,7 +146,11 @@ class AtualizarDisponibilidade(PermissionRequiredMixin, View):
         tecnico = Usuario.objects.get(pk=request.user.pk)
         tecnico.tecnico_ocupado = tecnico_ocupado
         tecnico.save()
-        return HttpResponseRedirect(request.META['HTTP_REFERER'])
+        if 'HTTP_REFERER' in request.META:
+            pagina_seguinte = request.META['HTTP_REFERER']
+        else:
+            pagina_seguinte = reverse_lazy('index_tecnico')
+        return HttpResponseRedirect(pagina_seguinte)
 
 
 class IndexTecnico(PermissionRequiredMixin, TemplateView):

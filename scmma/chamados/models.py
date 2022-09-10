@@ -1,10 +1,10 @@
+from datetime import datetime
 from decimal import Decimal
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models, transaction
 from typing import Union
 
-from datetime import datetime
-from .exceptions import SemTecnicosDisponiveisException
+from .exceptions import SemTecnicosDisponiveisException, CalculoDistanciaException
 from .utilitarios import converter_endereco_geolocalizacao, calcular_distancia_pontos
 
 
@@ -39,34 +39,60 @@ class GerenciadorUsuario(BaseUserManager):
 
 class GerenciadorChamado(models.Manager):
 
-    def create_chamado(self, **kwargs):
-        chamado = self.create(**kwargs)
+    def create_chamado(self, **kwargs) -> models.Model:
         try:
             with transaction.atomic():
+                chamado = self.create(**kwargs)
                 atendimento = Atendimento.objects.create_atendimento(chamado=chamado)
                 atendimento.save()
                 chamado.estado = 1  # se o atendimento for criado, o chamado muda o estado para 'Alocado'
-                # o padrão de protocolo é AAAAMMDDXXXXXX, sendo XXXXXX uma sequência crescente de protocolos do dia
-                agora = datetime.now()
-                ano, mes, dia = agora.year, agora.month, agora.day
-                prefixo_protocolo = f'{ano:04d}{mes:02d}{dia:02d}'
-                ultimo_chamado_hoje = Chamado.objects.filter(protocolo__startswith=prefixo_protocolo).last()
-                if not ultimo_chamado_hoje:
-                    sufixo_protocolo = f'{1:06d}'
-                else:
-                    ultimo_numero = int(ultimo_chamado_hoje.protocolo.replace(prefixo_protocolo, ''))
-                    sufixo_protocolo = f'{ultimo_numero + 1:06d}'
-                chamado.protocolo = f'{prefixo_protocolo}{sufixo_protocolo}'
+                chamado.protocolo = self.gerar_numero_protocolo()
         except Exception as e:
             raise e
         return chamado
 
+    def gerar_numero_protocolo(self) -> str:
+        """
+        Gera e retorna um número de protocolo com o seguinte formato: AAAAMMDDXXXXXX, sendo AAAA o ano, MM o mês e DD o
+        dia da abertura do chamado e XXXXX um número de sequência crescente dos chamados abertos no dia.
+        """
+        agora = datetime.now()
+        ano, mes, dia = agora.year, agora.month, agora.day
+        prefixo_protocolo = f'{ano:04d}{mes:02d}{dia:02d}'
+        ultimo_chamado_hoje = Chamado.objects.filter(protocolo__startswith=prefixo_protocolo).last()
+        if not ultimo_chamado_hoje:
+            sufixo_protocolo = f'{1:06d}'  # se não houver chamado na mesma data, inicia a sequência em 1
+        else:
+            ultimo_numero = int(ultimo_chamado_hoje.protocolo.replace(prefixo_protocolo, ''))
+            sufixo_protocolo = f'{ultimo_numero + 1:06d}'
+        return f'{prefixo_protocolo}{sufixo_protocolo}'
+
 
 class GerenciadorAtendimento(models.Manager):
 
-    def create_atendimento(self, nivel: int = 0, ignorar_tecnicos: list = [], **kwargs):
-        atendimento = self.create(**kwargs)
-        atendimento.alocar_tecnico(nivel=nivel, ignorar_tecnicos=ignorar_tecnicos)
+    def create_atendimento(self, **kwargs) -> models.Model:
+        """
+        Cria um registro de atendimento.
+
+        Parâmetros
+        ----------
+        nivel: int
+            Nível do técnico que deverá ser alocado para o atendimento.
+            Padrão: 0 [Nível 1].
+
+        ignorar_tecnicos: list
+            Lista de técnicos que não devem ser alocados para o atendimento. Geralmente, é o técnico que transferiu
+            o chamado.
+            Padrão: [].
+        """
+        nivel = kwargs.pop('nivel', 0)
+        ignorar_tecnicos = kwargs.pop('ignorar_tecnicos', [])
+        try:
+            with transaction.atomic():
+                atendimento = self.create(**kwargs)
+                atendimento.alocar_tecnico(nivel=nivel, ignorar_tecnicos=ignorar_tecnicos)
+        except Exception as e:
+            raise e
         return atendimento
 
 
@@ -96,18 +122,10 @@ class Usuario(AbstractUser):
     nivel = models.PositiveSmallIntegerField('Nível', choices=OPCOES_NIVEIS, null=True)
     ultima_latitude = models.CharField('Última latitude', max_length=50, null=True, blank=True)
     ultima_longitude = models.CharField('Última longitude', max_length=50, null=True, blank=True)
-    tecnico_ocupado = models.BooleanField('Tecnico disponível?', default=False)
-    USERNAME_FIELD = 'email'
+    tecnico_ocupado = models.BooleanField('Tecnico ocupado?', default=False)
+    USERNAME_FIELD = 'email'  # o nome de usuário é o email
     REQUIRED_FIELDS = []
     objects = GerenciadorUsuario()
-
-    def get_fields_cliente(self) -> tuple:
-        return [(field.verbose_name, field.value_from_object(self))
-                for field in self.__class__._meta.fields if field.name in self.CAMPOS_CLIENTE]
-
-    def get_fields_tecnico(self) -> tuple:
-        return [(field.verbose_name, field.value_from_object(self))
-                for field in self.__class__._meta.fields if field.name in self.CAMPOS_TECNICO]
 
     @property
     def tipo_usuario(self) -> str:
@@ -123,6 +141,20 @@ class Usuario(AbstractUser):
             return (Decimal(self.ultima_latitude), Decimal(self.ultima_longitude))
         except Exception:
             return None
+
+    @property
+    def campos(self) -> tuple:
+        campos = self.CAMPOS_CLIENTE if self.tipo_usuario == 'Cliente' else self.CAMPOS_TECNICO
+        campos_valor = []
+        for campo in self.__class__._meta.fields:
+            nome_campo = campo.verbose_name
+            valor = campo.value_from_object(self)
+            if campo.name not in campos:
+                continue
+            if campo.name == 'nivel':
+                valor = dict(self.OPCOES_NIVEIS)[valor]
+            campos_valor.append((nome_campo, valor))
+        return campos_valor
 
     def __str__(self) -> str:
         return self.get_full_name()
@@ -178,19 +210,31 @@ class Terminal(models.Model):
     @property
     def geolocalizacao(self) -> Union[tuple, None]:
         try:
-            return (Decimal(self.ultima_latitude), Decimal(self.ultima_longitude))
+            return (Decimal(self.latitude), Decimal(self.longitude))
         except Exception:
             return None
 
+    @property
+    def campos(self) -> list:
+        campos_valor = []
+        for campo in self.__class__._meta.fields:
+            nome_campo = campo.verbose_name
+            valor = campo.value_from_object(self)
+            if campo.name not in self.CAMPOS_TERMINAL:
+                continue
+            if campo.name == 'usuario':
+                valor = self.usuario.get_full_name()
+            campos_valor.append((nome_campo, valor))
+        return campos_valor
+
     def configurar_geolocalizacao(self):
+        """
+        Define os dados de geolocalização (latitude e longitude) por meio da consulta dos campos de endereço.
+        """
         endereco = ' '.join([getattr(self, campo) for campo in self.CAMPOS_ENDERECO if getattr(self, campo)])
         geolocalizacao = converter_endereco_geolocalizacao(endereco)
         if geolocalizacao:
             self.latitude, self.longitude = geolocalizacao
-
-    def get_fields(self) -> list:
-        return [(field.verbose_name, field.value_from_object(self))
-                for field in self.__class__._meta.fields if field.name in self.CAMPOS_TERMINAL]
 
     def __str__(self) -> str:
         return self.numero_serie
@@ -227,7 +271,7 @@ class Chamado(models.Model):
     def opcao_estado(self) -> str:
         return [item[1] for item in self.ESTADOS if item[0] == self.estado][0]
 
-    def get_fields(self) -> list:
+    def campos(self) -> list:
         return [
             ('Tipo', dict(self.TIPOS_CHAMADO)[self.tipo]),
             ('Descrição', self.descricao),
@@ -235,11 +279,18 @@ class Chamado(models.Model):
             ('Gravidade', dict(self.NIVEIS_GRAVIDADE)[self.gravidade]),
             ('Cliente', self.usuario),
             ('Terminal', self.terminal),
+            ('Rua', self.terminal.rua),
+            ('Número', self.terminal.numero),
+            ('Complemento', self.terminal.complemento),
+            ('Bairro', self.terminal.bairro),
+            ('Cidade', self.terminal.cidade),
+            ('Estado', dict(self.terminal.ESTADOS_FEDERACAO)[self.terminal.estado]),
+            ('CEP', self.terminal.cep)
         ]
 
 
 class Atendimento(models.Model):
-    tecnico = models.ForeignKey(Usuario, on_delete=models.CASCADE, null=True, blank=True)
+    tecnico = models.ForeignKey(Usuario, on_delete=models.CASCADE, null=True)
     chamado = models.ForeignKey(Chamado, on_delete=models.CASCADE)
     atividades = models.TextField('Atividades realizadas', null=True)
     transferido = models.BooleanField('Atendimento transferido', default=False)
@@ -247,16 +298,33 @@ class Atendimento(models.Model):
     objects = GerenciadorAtendimento()
 
     def alocar_tecnico(self, nivel: int = 0, ignorar_tecnicos: list = []):
-        tecnicos = Usuario.objects.filter(_tipo_usuario=1, nivel=nivel)
-        tecnicos_situacao = [(tecnico, tecnico.tecnico_ocupado, calcular_distancia_pontos(tecnico.geolocalizacao,
-                              self.chamado.terminal.geolocalizacao))
-                             for tecnico in tecnicos if tecnico not in ignorar_tecnicos]
-        if len(tecnicos_situacao) < 1:
+        """
+        Aloca um técnico para o atendimento seguindo critérios de disponibilidade e de proximidade (geolocalização).
+        """
+        tecnicos = Usuario.objects.filter(_tipo_usuario=1, nivel=nivel, is_active=True)
+        tecnicos_com_geolocalizacao = []
+        tecnicos_sem_geolocalizacao = []
+        self.chamado.terminal.configurar_geolocalizacao()
+        for tecnico in tecnicos:
+            if tecnico in ignorar_tecnicos:
+                continue
+            try:
+                distancia = calcular_distancia_pontos(tecnico.geolocalizacao, self.chamado.terminal.geolocalizacao)
+                tecnicos_com_geolocalizacao.append((tecnico, tecnico.tecnico_ocupado, distancia))
+            except CalculoDistanciaException:
+                tecnicos_sem_geolocalizacao.append((tecnico, tecnico.tecnico_ocupado, None))
+        # os técnicos com geolocalização são ordenados pela disponibilidade e distância em relação ao terminal
+        tecnicos_com_geolocalizacao = sorted(tecnicos_com_geolocalizacao, key=lambda x: (x[1], x[2]))
+        # os técnicos sem geolocalização são ordenados apenas pela disponibilidade
+        tecnicos_sem_geolocalizacao = sorted(tecnicos_sem_geolocalizacao, key=lambda x: (x[1]))
+        tecnicos_ordenados = tecnicos_com_geolocalizacao
+        # os técnicos sem geolocalização ficam no final da lista
+        tecnicos_ordenados.extend(tecnicos_sem_geolocalizacao)
+        if len(tecnicos_ordenados) < 1:
             raise SemTecnicosDisponiveisException()
-        tecnicos_ordenados = sorted(tecnicos_situacao, key=lambda x: (x[1], x[2]))
         self.tecnico = tecnicos_ordenados[0][0]
 
-    def get_fields(self) -> list:
+    def campos(self) -> list:
         return [
             ('Técnico', self.tecnico),
             ('Atividades', self.atividades),

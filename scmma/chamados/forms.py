@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.forms import ModelForm
 
+from .exceptions import ConfiguracaoGeolocalizacaoException
 from .models import Chamado, Terminal, Usuario, Atendimento
 
 UserModel = get_user_model()
@@ -55,6 +56,13 @@ class AdicionarTerminalForm(ModelForm):
         super().__init__(*args, **kwargs)
         # permite somente a seleção de clientes
         self.fields['usuario'].queryset = Usuario.objects.filter(_tipo_usuario=0)
+
+    def save(self, commit=True) -> object:
+        try:
+            self.instance.configurar_geolocalizacao()
+        except Exception:
+            raise ConfiguracaoGeolocalizacaoException()
+        return super().save()
 
 
 class ReativarTerminalForm(ModelForm):

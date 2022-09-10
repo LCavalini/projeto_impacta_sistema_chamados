@@ -1,5 +1,6 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.shortcuts import HttpResponse, render
+from django.shortcuts import HttpResponse, render, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView
 from django.views.generic import ListView, TemplateView, DetailView
@@ -23,6 +24,14 @@ class AdicionarChamado(PermissionRequiredMixin, CreateView):
         else:
             form = self.form_class()
         return render(request, self.template_name, {'form': form})
+
+    def post(self, request, *args, **kwargs) -> HttpResponse:
+        try:
+            return super().post(request, *args, **kwargs)
+        except Exception:
+            messages.add_message(request, level=messages.ERROR,
+                                 message='Erro ao abrir o chamado. Contate o administrador.')
+            return HttpResponseRedirect(self.success_url)
 
     def get_form_kwargs(self) -> dict:
         kwargs = {

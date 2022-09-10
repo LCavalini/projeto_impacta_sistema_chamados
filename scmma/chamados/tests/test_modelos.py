@@ -1,60 +1,17 @@
+from datetime import datetime
 from django.test import TestCase
 
+from chamados.exceptions import SemTecnicosDisponiveisException
 from chamados.models import Usuario, Chamado, Terminal, Atendimento
 
 
 class TestModelos(TestCase):
-
-    """
-    def test_tecnico_ocupado(self) -> None:
-        cliente = Usuario(email='msilva@gmail.com')
-        cliente.save()
-        tecnico = Usuario(email='jsilva@gmail.com')
-        tecnico.save()
-        terminal = Terminal(numero_serie='123')
-        terminal.save()
-        # chamado em atendimento
-        chamado = Chamado(usuario=cliente, terminal=terminal, gravidade=0, estado=2)
-        chamado.save()
-        atendimento = Atendimento(tecnico=tecnico, chamado=chamado)
-        atendimento.save()
-        self.assertTrue(tecnico.tecnico_ocupado())
-
-    def test_tecnico_nao_ocupado(self) -> None:
-        cliente = Usuario(email='msilva@gmail.com')
-        cliente.save()
-        tecnico = Usuario(email='jsilva@gmail.com')
-        tecnico.save()
-        terminal = Terminal(numero_serie='123')
-        terminal.save()
-        # chamado apenas alocado
-        chamado = Chamado(usuario=cliente, terminal=terminal, gravidade=0, estado=1)
-        chamado.save()
-        atendimento = Atendimento(tecnico=tecnico, chamado=chamado)
-        atendimento.save()
-        # o chamado não está em atendimento
-        self.assertFalse(tecnico.tecnico_ocupado())
-        chamado.estado = 2
-        chamado.save()
-        atendimento.transferido = True
-        atendimento.save()
-        # o chamado foi transferido
-        self.assertFalse(tecnico.tecnico_ocupado())
-        outro_tecnico = Usuario(email='jsantos@gmail.com')
-        outro_tecnico.save()
-        atendimento.tecnico = outro_tecnico
-        atendimento.transferido = False
-        atendimento.save()
-        # o técnico não tem chamados
-        self.assertFalse(tecnico.tecnico_ocupado())
-    """
 
     def test_alocar_tecnico(self):
         cliente = Usuario(email='jsilva@gmail.com')
         cliente.tipo_usuario = 0
         cliente.save()
         terminal = Terminal(numero_serie='123', rua='Praça da Sé', bairro='Sé', cidade='São Paulo', estado='SP')
-        terminal.configurar_geolocalizacao()
         terminal.save()
         chamado = Chamado(tipo=0, descricao='A máquina não inicializa', gravidade=1, usuario=cliente,
                           terminal=terminal)
@@ -81,3 +38,73 @@ class TestModelos(TestCase):
         resultado = atendimento.tecnico.email
         esperado = tecnico1.email  # técnico mais próximo e não ocupado
         self.assertEqual(resultado, esperado)
+
+    def test_gerar_numero_protocolo(self) -> None:
+        agora = datetime.now()
+        dia, mes, ano = agora.day, agora.month, agora.year
+        cliente = Usuario(email='cliente@cliente.com')
+        cliente.save()
+        terminal = Terminal(numero_serie='123')
+        terminal.save()
+        chamado1 = Chamado(tipo='erro_leitura_cartao', descricao='Sem descrição', gravidade=1, usuario=cliente,
+                           terminal=terminal)
+        chamado1.protocolo = Chamado.objects.gerar_numero_protocolo()
+        chamado1.save()
+        resultado = chamado1.protocolo
+        esperado = f'{ano:04d}{mes:02d}{dia:02d}{1:06d}'
+        self.assertEqual(resultado, esperado)
+        chamado2 = Chamado(tipo='erro_leitura_cartao', descricao='Sem descrição', gravidade=1, usuario=cliente,
+                           terminal=terminal)
+        chamado2.protocolo = Chamado.objects.gerar_numero_protocolo()
+        chamado2.save()
+        resultado = chamado2.protocolo
+        esperado = f'{ano:04d}{mes:02d}{dia:02d}{2:06d}'
+        self.assertEqual(resultado, esperado)
+
+    def test_create_chamado_valido(self) -> None:
+        """
+        Testa se a função create_chamado cria um chamado e um atendimento relacionado.
+        """
+        cliente = Usuario(email='jsilva@gmail.com')
+        cliente.tipo_usuario = 0
+        cliente.save()
+        terminal = Terminal(numero_serie='123', rua='Praça da Sé', bairro='Sé', cidade='São Paulo', estado='SP')
+        terminal.save()
+        tecnico = Usuario(email='msilva@gmail.com', nivel=0)
+        tecnico.tipo_usuario = 1
+        # Localização: Faculdade Impacta
+        tecnico.ultima_latitude, tecnico.ultima_longitude = '-23.5255246', '-46.6517839'
+        tecnico.save()
+        dados_chamado = {
+            'tipo': 'erro_leitura_cartao',
+            'descricao': 'Sem descrição',
+            'gravidade': 1,
+            'usuario': cliente,
+            'terminal': terminal
+        }
+        chamado = Chamado.objects.create_chamado(**dados_chamado)
+        chamado.save()
+        atendimento = Atendimento.objects.filter(chamado=chamado).last()
+        resultado = atendimento.tecnico.email
+        esperado = tecnico.email
+        self.assertEqual(resultado, esperado)
+
+    def test_create_chamado_invalido(self) -> None:
+        cliente = Usuario(email='jsilva@gmail.com')
+        cliente.tipo_usuario = 0
+        cliente.save()
+        terminal = Terminal(numero_serie='123', rua='Praça da Sé', bairro='Sé', cidade='São Paulo', estado='SP')
+        terminal.save()
+        # O técnico não tem geolocalização
+        tecnico = Usuario(email='msilva@gmail.com', nivel=0)
+        tecnico.tipo_usuario = 1
+        tecnico.save()
+        dados_chamado = {
+            'tipo': 'erro_leitura_cartao',
+            'descricao': 'Sem descrição',
+            'gravidade': 1,
+            'usuario': cliente,
+            'terminal': terminal
+        }
+        with self.assertRaises(SemTecnicosDisponiveisException):
+            Chamado.objects.create_chamado(**dados_chamado)

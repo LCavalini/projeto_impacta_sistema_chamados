@@ -10,6 +10,11 @@
         <h3 class="titulo-pagina m-3">Editar Terminal</h3>
     </div>
     <div class="card-body">
+        {% for message in messages %}
+        <div class="row alert alert-danger">
+            {{ message }}
+        </div>
+        {% endfor %}
         <form method="post" class="form-cadastro">
             {% csrf_token %}
             {% for field in form %}

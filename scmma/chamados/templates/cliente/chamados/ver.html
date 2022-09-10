@@ -11,7 +11,7 @@
     </div>
     <div class="card-body">
         <table class="table table-hover">
-            {% for campo, valor in chamado.get_fields %}
+            {% for campo, valor in chamado.campos %}
             <tr>
                 <td>{{ campo }}</td>
                 <td>{{ valor|default_if_none:'' }}</td>
