@@ -1,20 +1,15 @@
 {% extends "admin/base.html" %}
 
 {% block title %}
-    SCMMA - Área do Administrador - Editar Terminal
+    SCMMA - Área do Administrador - Editar Técnico
 {% endblock %}
 
 {% block content %}
 <div class="card col-lg-8 offset-lg-2 col-md-12 mt-5">
     <div class="card-title">
-        <h3 class="titulo-pagina m-3">Editar Terminal</h3>
+        <h3 class="titulo-pagina m-3">Editar Técnico</h3>
     </div>
     <div class="card-body">
-        {% for message in messages %}
-        <div class="row alert alert-danger">
-            {{ message }}
-        </div>
-        {% endfor %}
         <form method="post" class="form-cadastro">
             {% csrf_token %}
             {% for field in form %}
@@ -26,12 +21,12 @@
                     {% endif %}
                     <div class="row">
                         <div class="col-md-3">{{ field.label_tag }}</div>
-                        <div class="col-md-9">{{ field }}</div>
+                        <div class="col-md-8">{{ field }}</div>
                     </div>
                 </div>
             {% endfor %}
             <div class="row justify-content-center mt-4">
-                <input class="btn btn-primary my-3" type="submit" value="Enviar">
+                <input class="btn btn-primary" type="submit" value="Enviar">
             </div>
         </form>
     </div>

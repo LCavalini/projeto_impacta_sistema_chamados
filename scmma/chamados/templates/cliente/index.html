@@ -13,9 +13,19 @@
           <h5 class="card-title">Chamados</h5>
           <p class="card-text">Os chamados são solicitações de manutenção de máquinas de autoatendimento.</p>
           <a href="{% url 'adicionar_chamado' %}" class="btn btn-primary btn-sm m-2"><i class="fa-solid fa-plus"></i> Abrir</a>
-          <a href="{% url 'index_chamado' %}" class="btn btn-primary btn-sm m-2"><i class="fa-solid fa-arrow-right"></i> Acessar</a>
+          <a href="{% url 'index_cliente_chamado' %}" class="btn btn-primary btn-sm m-2"><i class="fa-solid fa-arrow-right"></i> Acessar</a>
         </div>
       </div>
     </div>
+    <div class="col-sm-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Terminais</h5>
+          <p class="card-text">Os chamados são solicitações de manutenção de máquinas de autoatendimento.</p>
+          <a href="{% url 'index_cliente_terminal' %}" class="btn btn-primary btn-sm m-2">
+            <i class="fa-solid fa-arrow-right"></i> Acessar</a>
+        </div>
+      </div>
   </div>
+</div>
 {% endblock %}

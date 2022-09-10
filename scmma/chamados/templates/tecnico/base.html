@@ -18,21 +18,19 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="{% url 'index_admin' %}">Área do administrador</a>
+                            <a class="nav-link active" aria-current="page" href="{% url 'index_tecnico' %}">Área do técnico</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="{% url 'admin_index_cliente' %}">Clientes</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="{% url 'admin_index_terminal' %}">Terminais</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="{% url 'admin_index_tecnico' %}">Técnicos</a>
+                            <a class="nav-link active" aria-current="page" href="{% url 'index_tecnico_chamado' %}">Chamados</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link active" aria-current="page" href="{% url 'desautenticar_usuario' %}"><i class="fa-solid fa-right-from-bracket"></i> Sair</a>
                         </li>
                     </ul>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input tecnico-ocupado" type="checkbox" role="switch" id="btn-tecnico-ocupado" {% if not user.tecnico_ocupado %}checked{% endif %}>
+                        <label class="form-check-label text-light" for="btn-tecnico-ocupado">Disponível</label>
+                    </div>
                 </div>
             </div>
         </nav> 
@@ -43,6 +41,9 @@
         <script src="{% static 'js/bootstrap.min.js' %}"></script>
         <script src="{% static 'js/jquery-3.6.1.min.js' %}"></script>
         <script src="{% static 'js/jquery.mask.min.js' %}"></script>
+        <script type="text/javascript">
+            window.CSRF_TOKEN = "{{ csrf_token }}";
+        </script> 
         <script src="{% static 'js/scripts.js' %}"></script>
     </body>
 </html>

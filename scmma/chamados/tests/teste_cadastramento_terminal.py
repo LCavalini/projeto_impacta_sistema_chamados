@@ -15,7 +15,14 @@ class TestCadastramentoTerminal(TestCase):
     def test_adicionar_terminal_valido(self) -> None:
         dados = {
             'numero_serie': '123',
-            'rua': 'Praça da Sé'
+            'data_instalacao': '2022-08-05',  # o modelo usa o formato YYYY-MM-DD
+            'rua': 'Praça da Sé',
+            'numero': 's/n',
+            'complemento': 'Estação da Sé - Piso Térreo - Entrada',
+            'bairro': 'Sé',
+            'cidade': 'São Paulo',
+            'estado': 'SP',
+            'cep': '01310200'
         }
         caminho = reverse_lazy('adicionar_terminal')
         resposta = self.cliente_web.post(caminho, data=dados, format=dict)

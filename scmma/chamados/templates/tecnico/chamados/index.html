@@ -1,0 +1,62 @@
+{% extends 'tecnico/base.html' %}
+
+{% block title %}
+    SCMMA - Área do Técnico - Chamados
+{% endblock %}
+
+
+{% block content %}
+<div class="card col-lg-12 mt-5">
+    <div class="card-title">
+        <h3 class="titulo-pagina m-2">Chamados</h3>
+    </div>
+    {% for message in messages %}
+    <div class="row alert alert-danger">
+        {{ message }}
+    </div>
+    {% endfor %}
+    <div class="card-body">
+        <table class="table table-borderless my-2">
+            <thead>
+                <tr>
+                    <th>Protocolo</th>
+                    <th>Terminal</th>
+                    <th>Estado</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for chamado in chamados %}
+                <tr>
+                    <td>{{ chamado.protocolo|default_if_none:'' }}</td>
+                    <td>{{ chamado.terminal|default_if_none:'' }}</td>
+                    <td>{{ chamado.opcao_estado }}</td>
+                    <td>
+                        <a class="btn btn-primary btn-sm" href="{% url 'tecnico_ver_chamado' chamado.pk %}">
+                            <i class="fa-solid fa-eye"></i>
+                        </a>
+                        <a class="btn btn-primary btn-sm" href="{% url 'tecnico_historico_chamado' chamado.pk %}">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </a>
+                        {% if chamado.opcao_estado == 'Alocado' %}
+                            <a href="{% url 'atender_chamado' chamado.pk %}" class="btn btn-primary btn-sm">
+                                <i class="fa-solid fa-wrench"></i>
+                            </a>
+                        {% elif chamado.opcao_estado == 'Em atendimento' %}
+                            <a href="{% url 'encerrar_chamado' chamado.pk %}" class="btn btn-primary btn-sm">
+                                <i class="fa-solid fa-flag-checkered"></i>
+                            </a>
+                        {% endif %}
+                        {% if chamado.opcao_estado != 'Encerrado' %}
+                        <a href="{% url 'transferir_chamado' chamado.pk %}" class="btn btn-primary btn-sm">
+                            <i class="fa-solid fa-right-left"></i>
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

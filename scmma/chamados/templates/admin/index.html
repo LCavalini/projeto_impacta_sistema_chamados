@@ -27,5 +27,15 @@
         </div>
       </div>
     </div>
+    <div class="col-sm-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Técnicos</h5>
+          <p class="card-text">Técnicos que realizam a manutenção dos terminais de autoatendimento.</p>
+          <a href="{% url 'adicionar_tecnico' %}" class="btn btn-primary btn-sm m-2"><i class="fa-solid fa-plus"></i> Adicionar</a>
+          <a href="{% url 'admin_index_tecnico' %}" class="btn btn-primary btn-sm m-2"><i class="fa-solid fa-arrow-right"></i> Acessar</a>
+        </div>
+      </div>
+    </div>
   </div>
 {% endblock %}

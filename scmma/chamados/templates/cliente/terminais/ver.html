@@ -1,16 +1,15 @@
-{% extends 'admin/base.html' %}
+{% extends 'cliente/base.html' %}
 
 {% block title %}
-    SCMMA - Área do Administrador - Reativar Terminal
+    SCMMA - Área do Cliente - Ver Terminal
 {% endblock %}
 
 {% block content %}
 <div class="card col-lg-8 offset-lg-2 col-md-12 mt-5">
     <div class="card-title">
-        <h3>Reativar Terminal</h3>
+        <h3>Terminal {{ terminal.numero_serie }}</h3>
     </div>
     <div class="card-body">
-        <p>Tem certeza que deseja reativar o terminal abaixo?</p>
         <table class="table table-hover">
             {% for campo, valor in terminal.campos %}
             <tr>
@@ -19,13 +18,6 @@
             </tr>
             {% endfor %}
         </table>
-        <form method="post" class="form-cadastro">
-            {% csrf_token %}
-            {{ form }}
-            <div class="row justify-content-center mt-4">
-                <input type="submit" class="btn btn-primary" value="Reativar">
-            </div>
-        </form>
     </div>
 </div>
 {% endblock %}

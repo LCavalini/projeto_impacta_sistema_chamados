@@ -17,8 +17,12 @@ class TestCadastramentoChamados(TestCase):
         ]
         self.usuario_cliente.user_permissions.set(permissoes)
         self.usuario_cliente.save()
+        self.usuario_tecnico = Usuario(email='tecnico@tecnico.com', tipo_usuario=1, ultima_latitude='-23.5255246',
+                                       ultima_longitude='-46.6517839', nivel=0)
+        self.usuario_tecnico.save()
         self.cliente_web.force_login(self.usuario_cliente)
-        self.terminal = Terminal(numero_serie='123', usuario=self.usuario_cliente)
+        self.terminal = Terminal(numero_serie='123', usuario=self.usuario_cliente, rua='Praça da Sé', bairro='Sé',
+                                 cidade='São Paulo', estado='SP')
         self.terminal.save()
 
     def test_abrir_chamado(self) -> None:
@@ -26,13 +30,13 @@ class TestCadastramentoChamados(TestCase):
             'tipo': 'erro_leitura_cartao',
             'descricao': 'A máquina não está conseguindo ler os cartões dos usuários',
             'gravidade': 1,
-            'usuario': self.usuario_cliente.pk,
+            'usuario': self.usuario_cliente,
             'terminal': self.terminal.pk
         }
         caminho = reverse_lazy('adicionar_chamado')
         resposta = self.cliente_web.post(caminho, data=dados, format=dict)
         resultado = resposta
-        esperado = reverse_lazy('index_chamado')
+        esperado = reverse_lazy('index_cliente_chamado')
         self.assertRedirects(resultado, esperado)  # teste da requisição
         chamado = Chamado.objects.get(tipo=dados['tipo'])
         resultado = chamado.descricao

@@ -49,3 +49,5 @@ class Index(LoginRequiredMixin, View):
             return HttpResponseRedirect(reverse_lazy('index_cliente'))
         elif request.user.tipo_usuario == 'Administrador':
             return HttpResponseRedirect(reverse_lazy('index_admin'))
+        elif request.user.tipo_usuario == 'Técnico':
+            return HttpResponseRedirect(reverse_lazy('index_tecnico'))

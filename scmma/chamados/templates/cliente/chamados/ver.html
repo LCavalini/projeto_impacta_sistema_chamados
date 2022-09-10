@@ -1,17 +1,17 @@
-{% extends 'admin/base.html' %}
+{% extends 'cliente/base.html' %}
 
 {% block title %}
-    SCMMA - Área do Administrador - Ver Cliente
+    SCMMA - Área do Cliente - Ver Chamado
 {% endblock %}
 
 {% block content %}
 <div class="card col-lg-8 offset-lg-2 col-md-12 mt-5">
     <div class="card-title">
-        <h3>Cliente {{ usuario.get_full_name }}</h3>
+        <h3>Chamado</h3>
     </div>
     <div class="card-body">
         <table class="table table-hover">
-            {% for campo, valor in usuario.campos %}
+            {% for campo, valor in chamado.campos %}
             <tr>
                 <td>{{ campo }}</td>
                 <td>{{ valor|default_if_none:'' }}</td>

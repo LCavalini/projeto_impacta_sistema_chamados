@@ -44,3 +44,8 @@ form.form-cadastro .btn {
 .campo_obrigatorio:after {
     content: '*';
 }
+
+
+#btn-tecnico-ocupado:checked {
+    background-color: lightgreen;
+}

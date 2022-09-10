@@ -9,6 +9,11 @@
     <div class="card-title">
         <h3 class="titulo-pagina m-3">Adicionar Terminal</h3>
     </div>
+    {% for message in messages %}
+    <div class="row alert alert-danger">
+        {{ message }}
+    </div>
+    {% endfor %}
     <div class="card-body">
         <form method="post" class="form-cadastro">
             {% csrf_token %}
