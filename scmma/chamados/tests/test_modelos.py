@@ -95,8 +95,8 @@ class TestModelos(TestCase):
         cliente.save()
         terminal = Terminal(numero_serie='123', rua='Praça da Sé', bairro='Sé', cidade='São Paulo', estado='SP')
         terminal.save()
-        # O técnico não tem geolocalização
-        tecnico = Usuario(email='msilva@gmail.com', nivel=0)
+        # O técnico é de nível 1 e não pode receber o chamado
+        tecnico = Usuario(email='msilva@gmail.com', nivel=1)
         tecnico.tipo_usuario = 1
         tecnico.save()
         dados_chamado = {
