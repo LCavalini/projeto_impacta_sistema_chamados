@@ -192,7 +192,7 @@ class Terminal(models.Model):
         ('SE', 'Sergipe'),
         ('TO', 'Tocantins'),
     )
-    CAMPOS_ENDERECO = ('rua', 'numero', 'bairro', 'cep', 'cidade', 'estado', )
+    CAMPOS_ENDERECO = ('rua', 'numero', 'cidade', 'estado', )
     numero_serie = models.CharField('Número de série', max_length=50, unique=True)
     data_instalacao = models.DateField('Data de instalação', null=True, blank=True)
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, verbose_name='Cliente', null=True, blank=True)
